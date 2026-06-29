@@ -1,0 +1,751 @@
+---
+import type { CollectionEntry } from 'astro:content'
+
+import { getBlogCollection, sortMDByDate } from 'astro-pure/server'
+import { Icon } from 'astro-pure/user'
+import PageLayout from '@/layouts/BaseLayout.astro'
+import LinkInsightList from '@/components/categories/LinkInsightList.astro'
+import KnowledgeIndexHero from '@/components/KnowledgeIndexHero.astro'
+import { buildCategoryInsights } from '@/utils/category-insights'
+import {
+  getAllCategories,
+  getCategoryLabel,
+  getCategorySegments,
+  getPostCategory
+} from '@/utils/content-paths'
+
+const posts = sortMDByDate(await getBlogCollection()) as CollectionEntry<'blog'>[]
+const categoryMap = getAllCategories(posts)
+const { insights, postInsights } = await buildCategoryInsights(posts)
+const categories = [...categoryMap.entries()]
+  .map(([path, categoryPosts]) => ({
+    path,
+    label: getCategoryLabel(path.split('/').at(-1) ?? path),
+    depth: getCategorySegments(path).length,
+    directPosts: categoryPosts.filter((post) => getPostCategory(post) === path).length,
+    totalPosts: categoryPosts.length
+  }))
+  .sort((a, b) => a.path.localeCompare(b.path))
+
+const rootCategories = categories.filter(({ depth }) => depth === 1)
+const unfiledPostItems = posts.filter((post) => !getPostCategory(post))
+const filedPosts = posts.filter(getPostCategory)
+const unfiledPosts = posts.length - filedPosts.length
+
+const formatDate = (date: string) =>
+  new Intl.DateTimeFormat('zh-CN', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  }).format(new Date(date))
+
+const tagCounts = new Map<string, number>()
+posts.forEach((post) => {
+  post.data.tags.forEach((tag) => tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1))
+})
+const topTags = [...tagCounts]
+  .sort(([tagA, countA], [tagB, countB]) => countB - countA || tagA.localeCompare(tagB))
+  .slice(0, 8)
+const defaultPreviewKey = 'overview'
+
+const meta = {
+  title: 'Categories',
+  description: 'Browse posts by their folder-based knowledge structure'
+}
+---
+
+<PageLayout {meta}>
+  <main class='categories-page mt-6 lg:mt-10'>
+    <KnowledgeIndexHero
+      icon='package'
+      eyebrow='Knowledge folders'
+      title='分类'
+      description='目录负责稳定归档，标签负责跨目录连接，链接负责建立文章之间的关系。'
+      stats={[
+        { label: '目录', value: categories.length },
+        { label: '一级目录', value: rootCategories.length },
+        { label: '已归档文章', value: filedPosts.length }
+      ]}
+      statsLabel='分类统计'
+      symbol='/'
+    />
+
+    {
+      rootCategories.length > 0 || unfiledPostItems.length > 0 ? (
+        <section
+          id='content'
+          class='root-browser animate'
+          aria-label='知识库根目录'
+          data-root-browser
+        >
+          <div class='browser-column browser-places' data-browser-column>
+            <header>
+              <span>位置</span>
+              <small>知识体系</small>
+            </header>
+            <div class='browser-list'>
+              <a
+                class='browser-row is-current'
+                href='/categories'
+                aria-current='page'
+                data-browser-item
+                data-preview-key={defaultPreviewKey}
+              >
+                <span class='row-icon'>
+                  <Icon name='package' />
+                </span>
+                <span>
+                  <strong>分类</strong>
+                  <small>知识库根目录</small>
+                </span>
+              </a>
+              <a class='browser-row' href='/tags' data-browser-item>
+                <span class='row-icon'>
+                  <Icon name='hashtag' />
+                </span>
+                <span>
+                  <strong>标签</strong>
+                  <small>跨目录主题</small>
+                </span>
+              </a>
+              <a class='browser-row' href='/archives' data-browser-item>
+                <span class='row-icon'>
+                  <Icon name='time' />
+                </span>
+                <span>
+                  <strong>时光机</strong>
+                  <small>按时间浏览</small>
+                </span>
+              </a>
+            </div>
+          </div>
+
+          <div class='browser-column browser-roots' data-browser-column>
+            <header>
+              <span>根目录</span>
+              <small>{rootCategories.length} 目录 · {unfiledPostItems.length} 文章</small>
+            </header>
+            <div class='browser-list'>
+              {
+                rootCategories.map((category) => {
+                  const insight = insights.get(category.path)!
+                  return (
+                    <a
+                      class='browser-row'
+                      href={`/categories/${category.path}`}
+                      data-browser-item
+                      data-preview-key={`category:${category.path}`}
+                    >
+                      <span class='row-icon'>
+                        <Icon name='package' />
+                      </span>
+                      <span>
+                        <strong>{category.label}</strong>
+                        <small>
+                          {category.totalPosts} 篇 · {insight.childCategories} 个子目录
+                        </small>
+                      </span>
+                      <span aria-hidden='true'>›</span>
+                    </a>
+                  )
+                })
+              }
+              {
+                unfiledPostItems.map((post) => {
+                  const insight = postInsights.get(post.id)!
+                  return (
+                    <a
+                      class='browser-row'
+                      href={insight.href}
+                      data-browser-item
+                      data-preview-key={`post:${post.id}`}
+                    >
+                      <span class='row-icon'>
+                        <Icon name='document' />
+                      </span>
+                      <span>
+                        <strong>{insight.title}</strong>
+                        <small>{formatDate(insight.date)}</small>
+                      </span>
+                    </a>
+                  )
+                })
+              }
+            </div>
+          </div>
+
+          <aside class='browser-column browser-preview' aria-live='polite'>
+            <header>
+              <span>预览</span>
+              <small>目录信息</small>
+            </header>
+
+            <article class='preview-panel' data-preview-panel={defaultPreviewKey}>
+              <div class='preview-heading'>
+                <span>
+                  <Icon name='package' />
+                </span>
+                <div>
+                  <small>知识库</small>
+                  <h2>全部分类</h2>
+                </div>
+              </div>
+
+              <dl class='preview-stats'>
+                <div>
+                  <dt>文章</dt>
+                  <dd>{posts.length}</dd>
+                </div>
+                <div>
+                  <dt>已归档</dt>
+                  <dd>{filedPosts.length}</dd>
+                </div>
+                <div>
+                  <dt>未归档</dt>
+                  <dd>{unfiledPosts}</dd>
+                </div>
+                <div>
+                  <dt>标签</dt>
+                  <dd>{tagCounts.size}</dd>
+                </div>
+              </dl>
+
+              <section class='preview-section'>
+                <h3>结构说明</h3>
+                <p>
+                  文件夹决定文章的分类归属，但不会进入文章固定网址。移动知识库文件时，分类会自动更新。
+                </p>
+              </section>
+
+              {topTags.length > 0 && (
+                <section class='preview-section'>
+                  <h3>主要标签</h3>
+                  <div class='tag-cloud'>
+                    {topTags.map(([tag, count]) => (
+                      <a href={`/tags/${encodeURIComponent(tag)}`}>
+                        #{tag}
+                        <span>{count}</span>
+                      </a>
+                    ))}
+                  </div>
+                </section>
+              )}
+            </article>
+
+            {rootCategories.map((category) => {
+              const insight = insights.get(category.path)!
+              const children = categories.filter(
+                ({ path, depth }) => depth === 2 && path.startsWith(`${category.path}/`)
+              )
+
+              return (
+                <article
+                  class='preview-panel'
+                  data-preview-panel={`category:${category.path}`}
+                  hidden
+                >
+                  <div class='preview-heading'>
+                    <span>
+                      <Icon name='package' />
+                    </span>
+                    <div>
+                      <small>一级目录</small>
+                      <h2>{category.label}</h2>
+                    </div>
+                  </div>
+
+                  <dl class='preview-stats'>
+                    <div>
+                      <dt>全部文章</dt>
+                      <dd>{insight.totalPosts}</dd>
+                    </div>
+                    <div>
+                      <dt>直接文章</dt>
+                      <dd>{insight.directPosts}</dd>
+                    </div>
+                    <div>
+                      <dt>入链</dt>
+                      <dd>{insight.inboundLinks}</dd>
+                    </div>
+                    <div>
+                      <dt>出链</dt>
+                      <dd>{insight.outboundLinks}</dd>
+                    </div>
+                  </dl>
+                  <LinkInsightList
+                    inbound={insight.inboundLinkDetails}
+                    outbound={insight.outboundLinkDetails}
+                  />
+
+                  {children.length > 0 && (
+                    <section class='preview-section'>
+                      <h3>子目录</h3>
+                      <ul class='child-list'>
+                        {children.map((child) => (
+                          <li>
+                            <a href={`/categories/${child.path}`}>
+                              <span>{child.label}</span>
+                              <small>{child.totalPosts} 篇</small>
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
+                  )}
+
+                  {insight.topTags.length > 0 && (
+                    <section class='preview-section'>
+                      <h3>主要标签</h3>
+                      <div class='tag-cloud'>
+                        {insight.topTags.map(({ name, count }) => (
+                          <a href={`/tags/${encodeURIComponent(name)}`}>
+                            #{name}
+                            <span>{count}</span>
+                          </a>
+                        ))}
+                      </div>
+                    </section>
+                  )}
+
+                  {insight.relatedCategories.length > 0 && (
+                    <section class='preview-section'>
+                      <h3>相关目录</h3>
+                      <ul class='relation-list'>
+                        {insight.relatedCategories.slice(0, 3).map((related) => (
+                          <li>
+                            <a href={`/categories/${related.path}`}>
+                              <span>{related.label}</span>
+                              <small>
+                                {related.crossLinks > 0
+                                  ? `${related.crossLinks} 条跨目录链接`
+                                  : `${related.sharedTags.length} 个共同标签`}
+                              </small>
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
+                  )}
+
+                  <a class='open-category' href={`/categories/${category.path}`}>
+                    打开目录 <span aria-hidden='true'>→</span>
+                  </a>
+                </article>
+              )
+            })}
+
+            {unfiledPostItems.map((post) => {
+              const insight = postInsights.get(post.id)!
+              return (
+                <article class='preview-panel' data-preview-panel={`post:${post.id}`} hidden>
+                  <div class='preview-heading'>
+                    <span>
+                      <Icon name='document' />
+                    </span>
+                    <div>
+                      <small>文章</small>
+                      <h2>{insight.title}</h2>
+                    </div>
+                  </div>
+                  <p class='post-description'>{insight.description}</p>
+                  <dl class='preview-stats'>
+                    <div>
+                      <dt>入链</dt>
+                      <dd>{insight.inboundLinks}</dd>
+                    </div>
+                    <div>
+                      <dt>出链</dt>
+                      <dd>{insight.outboundLinks}</dd>
+                    </div>
+                    <div class='wide-stat'>
+                      <dt>更新</dt>
+                      <dd>{formatDate(insight.date)}</dd>
+                    </div>
+                  </dl>
+                  <LinkInsightList
+                    inbound={insight.inboundLinkDetails}
+                    outbound={insight.outboundLinkDetails}
+                  />
+                  {insight.tags.length > 0 && (
+                    <section class='preview-section'>
+                      <h3>标签</h3>
+                      <div class='tag-cloud'>
+                        {insight.tags.map((tag) => (
+                          <a href={`/tags/${encodeURIComponent(tag)}`}>#{tag}</a>
+                        ))}
+                      </div>
+                    </section>
+                  )}
+                  <a class='open-category' href={insight.href}>
+                    打开文章 <span aria-hidden='true'>→</span>
+                  </a>
+                </article>
+              )
+            })}
+          </aside>
+        </section>
+      ) : (
+        <p id='content' class='empty-state animate'>
+          把文章放进子文件夹后，分类会自动出现在这里。
+        </p>
+      )
+    }
+  </main>
+
+  <script>
+    const setupRootBrowser = () => {
+      document.querySelectorAll<HTMLElement>('[data-root-browser]').forEach((browser) => {
+        if (browser.dataset.initialized === 'true') return
+        browser.dataset.initialized = 'true'
+
+        const items = [...browser.querySelectorAll<HTMLElement>('[data-browser-item]')]
+        const panels = [...browser.querySelectorAll<HTMLElement>('[data-preview-panel]')]
+        let previewTimeout: number | undefined
+
+        const showPreview = (item: HTMLElement, immediate = false) => {
+          const key = item.dataset.previewKey
+          if (!key) return
+
+          const update = () => {
+            items.forEach((candidate) =>
+              candidate.classList.toggle('is-previewing', candidate === item)
+            )
+            panels.forEach((panel) => {
+              panel.hidden = panel.dataset.previewPanel !== key
+            })
+          }
+
+          if (immediate) {
+            clearTimeout(previewTimeout)
+            update()
+          } else {
+            clearTimeout(previewTimeout)
+            previewTimeout = window.setTimeout(update, 150)
+          }
+        }
+
+        items.forEach((item) => {
+          item.addEventListener('focus', () => showPreview(item, true))
+          item.addEventListener('mouseenter', () => showPreview(item))
+          item.addEventListener('mouseleave', () => clearTimeout(previewTimeout))
+        })
+      })
+    }
+
+    setupRootBrowser()
+    document.addEventListener('astro:page-load', setupRootBrowser)
+  </script>
+</PageLayout>
+
+<style>
+  .root-browser {
+    display: grid;
+    grid-template-columns: minmax(10rem, 0.68fr) minmax(15rem, 1fr) minmax(18rem, 1.25fr);
+    min-height: 35rem;
+    margin-top: 2rem;
+    overflow: hidden;
+    border: 1px solid hsl(var(--border));
+    border-radius: 1.35rem;
+    background: hsl(var(--background) / 0.78);
+    box-shadow: 0 1.25rem 3rem hsl(var(--foreground) / 0.05);
+  }
+
+  .browser-column {
+    min-width: 0;
+  }
+
+  .browser-column + .browser-column {
+    border-left: 1px solid hsl(var(--border));
+  }
+
+  .browser-column > header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 2.8rem;
+    padding: 0.75rem 0.9rem;
+    border-bottom: 1px solid hsl(var(--border));
+    background: hsl(var(--muted) / 0.45);
+    font-size: 0.75rem;
+    font-weight: 650;
+  }
+
+  .browser-column > header small {
+    color: hsl(var(--muted-foreground));
+    font-weight: 400;
+  }
+
+  .browser-list {
+    padding: 0.45rem;
+  }
+
+  .browser-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.7rem;
+    border-radius: 0.7rem;
+    outline: none;
+    transition:
+      color 120ms ease,
+      background 120ms ease;
+  }
+
+  .browser-row:hover,
+  .browser-row:focus-visible,
+  .browser-row.is-previewing {
+    background: hsl(var(--primary) / 0.1);
+    color: hsl(var(--primary));
+  }
+
+  .browser-row.is-current {
+    background: hsl(var(--primary) / 0.12);
+  }
+
+  .browser-row strong,
+  .browser-row small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .browser-row strong {
+    font-size: 0.84rem;
+    font-weight: 580;
+  }
+
+  .browser-row small {
+    margin-top: 0.1rem;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.67rem;
+  }
+
+  .row-icon {
+    display: grid;
+    width: 1.35rem;
+    height: 1.35rem;
+    place-items: center;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .browser-row:hover .row-icon,
+  .browser-row:focus-visible .row-icon,
+  .browser-row.is-previewing .row-icon {
+    color: hsl(var(--primary));
+  }
+
+  .browser-preview {
+    background:
+      radial-gradient(circle at 100% 0%, hsl(var(--primary) / 0.09), transparent 40%),
+      hsl(var(--background));
+  }
+
+  .preview-panel {
+    padding: 1.25rem;
+  }
+
+  .preview-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .preview-heading > span {
+    display: grid;
+    flex: 0 0 auto;
+    width: 2.6rem;
+    height: 2.6rem;
+    place-items: center;
+    border-radius: 0.8rem;
+    background: hsl(var(--primary) / 0.1);
+    color: hsl(var(--primary));
+  }
+
+  .preview-heading small {
+    color: hsl(var(--muted-foreground));
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .preview-heading h2 {
+    margin: 0.1rem 0 0;
+    font-size: 1.25rem;
+    line-height: 1.2;
+  }
+
+  .preview-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+    margin: 1.2rem 0 0;
+  }
+
+  .preview-stats > div {
+    padding: 0.7rem;
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.75rem;
+    background: hsl(var(--muted) / 0.3);
+  }
+
+  .preview-stats dt {
+    color: hsl(var(--muted-foreground));
+    font-size: 0.66rem;
+  }
+
+  .preview-stats dd {
+    margin: 0.15rem 0 0;
+    font-size: 1.15rem;
+    font-weight: 650;
+  }
+
+  .preview-stats .wide-stat {
+    grid-column: 1 / -1;
+  }
+
+  .wide-stat dd {
+    font-size: 0.9rem;
+  }
+
+  .post-description {
+    margin: 1rem 0 0;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.76rem;
+    line-height: 1.6;
+  }
+
+  .preview-section {
+    margin-top: 1.25rem;
+  }
+
+  .preview-section h3 {
+    margin: 0 0 0.55rem;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .preview-section p {
+    margin: 0;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.76rem;
+    line-height: 1.65;
+  }
+
+  .tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .tag-cloud a {
+    display: inline-flex;
+    gap: 0.35rem;
+    padding: 0.28rem 0.55rem;
+    border-radius: 999px;
+    background: hsl(var(--muted) / 0.75);
+    font-size: 0.7rem;
+  }
+
+  .tag-cloud a:hover,
+  .child-list a:hover,
+  .relation-list a:hover {
+    color: hsl(var(--primary));
+  }
+
+  .tag-cloud span,
+  .child-list small,
+  .relation-list small {
+    color: hsl(var(--muted-foreground));
+  }
+
+  .child-list,
+  .relation-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .child-list li + li,
+  .relation-list li + li {
+    border-top: 1px solid hsl(var(--border));
+  }
+
+  .child-list a,
+  .relation-list a {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    font-size: 0.78rem;
+  }
+
+  .child-list small,
+  .relation-list small {
+    flex: 0 0 auto;
+    font-size: 0.66rem;
+  }
+
+  .open-category {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1.25rem;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid hsl(var(--primary) / 0.25);
+    border-radius: 0.75rem;
+    color: hsl(var(--primary));
+    font-size: 0.78rem;
+  }
+
+  .empty-state {
+    margin-top: 2rem;
+    padding: 2rem;
+    border: 1px dashed hsl(var(--border));
+    border-radius: 1rem;
+    color: hsl(var(--muted-foreground));
+    text-align: center;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  @media (max-width: 900px) {
+    .root-browser {
+      grid-template-columns: minmax(9rem, 0.7fr) minmax(14rem, 1fr);
+    }
+
+    .browser-preview {
+      grid-column: 1 / -1;
+      min-height: 22rem;
+      border-top: 1px solid hsl(var(--border));
+      border-left: 0 !important;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .root-browser {
+      display: block;
+      overflow: visible;
+    }
+
+    .browser-column + .browser-column {
+      border-top: 1px solid hsl(var(--border));
+      border-left: 0;
+    }
+
+    .browser-places .browser-list {
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
+
+    .browser-places .browser-row {
+      flex: 0 0 auto;
+      min-width: 9rem;
+    }
+  }
+</style>

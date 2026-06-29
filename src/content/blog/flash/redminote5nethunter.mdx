@@ -1,0 +1,178 @@
+---
+title: Redmi Note5刷入Kali NetHunter
+publishDate: "2025-02-18 22:19:29"
+description: 在Redmi Note5上刷入Kali NetHunter的完整教程
+tags:
+  - Flash
+  - Android
+  - NetHunter
+draft: false
+comment: true
+language: 中文
+---
+
+import { Aside } from 'astro-pure/user'
+
+## 概述
+
+本教程将介绍如何在Redmi Note5（代号whyred）上刷入Kali NetHunter，这是一个基于Android的移动渗透测试平台。
+
+## 前置准备
+
+### 1. 解锁Bootloader
+
+- [申请解锁小米手机](https://www.miui.com/unlock/index.html)
+
+### 2. 下载开发版刷机包
+
+- [红米 Note 5 / Note 5 Pro (whyred) 全球版 Fastboot 线刷包 & Recovery 卡刷包 ROM | XiaomiROM.com](https://xiaomirom.com/rom/redmi-note-5-note-5-pro-whyred-global-fastboot-recovery-rom/)
+
+### 3. 下载刷机工具
+
+- [下载官方小米刷机工具 MiFlash，含小米刷机教程步骤 | XiaomiROM.com](https://xiaomirom.com/download-xiaomi-flash-tool-miflash/)
+
+## 刷入开发版
+
+1. 使用MiFlash刷入开发版
+2. 在设置中搜索"root"，解锁root权限
+3. 在手机上下载TWRP应用与Magisk应用
+
+## 安装TWRP
+
+### 查找TWRP资源
+
+在TWRP中搜索型号"whyred"：
+
+- [twrp.me](https://twrp.me/)
+- [TeamWin/android_device_xiaomi_whyred](https://github.com/TeamWin/android_device_xiaomi_whyred)
+
+### 获取Root权限
+
+- [topjohnwu/Magisk: The Magic Mask for Android](https://github.com/topjohnwu/Magisk)
+
+<Aside type="note">
+获取root权限的官方网站年久失修了，建议使用Magisk。
+</Aside>
+
+### 安装方式
+
+- TWRP自动刷入
+- 或Magisk刷入TWRP
+
+### 下载ADB工具
+
+- [SDK 平台工具版本说明 | Android Studio | Android Developers](https://developer.android.com/tools/releases/platform-tools?hl=zh-cn)
+- [通用 ADB 驱动程序](https://adb.clockworkmod.com/)
+
+### 下载TWRP镜像
+
+- [Download twrp-3.7.0_9-0-whyred.img](https://dl.twrp.me/whyred/twrp-3.7.0_9-0-whyred.img.html)
+
+### 使用Magisk补全Boot镜像
+
+用Magisk补全刚刚线刷包中的`boot.img`。
+
+### 刷入命令
+
+```shell
+adb reboot bootloader
+fastboot flash boot magiskboot.img
+fastboot flash recovery twrp.img
+fastboot reboot
+```
+
+### 进入Recovery
+
+长按开机键和音量加键进入Recovery。
+
+<Aside type="caution">
+如果音量加键坏了，可以重启系统后进入TWRP应用，选择"reboot to rec"。
+</Aside>
+
+## 刷入NetHunter
+
+### 下载NetHunter通用包
+
+- [Index of /nethunter-images/current/](https://kali.download/nethunter-images/current/)
+
+### 下载内核
+
+- [Release Team420 Nethunter RAD x5.4 EAS Whyred v3.4 · Team-420/Nethunter-Whyred-Eas](https://github.com/Team-420/Nethunter-Whyred-Eas/releases/tag/Nethunter-v3.4)
+
+### 安装说明
+
+<Aside type="note">
+INSTALL INSTRUCTIONS:
+
+1. Reboot into Recovery (e.g. TWRP)
+2. Flash official nethunter arm64 generic zip: [nethunter-2020.3-generic-arm64-kalifs-full.zip](https://images.kali.org/nethunter/nethunter-2020.3-generic-arm64-kalifs-full.zip)
+3. Flash the kernel zip attached in this post.
+4. Flash latest Magisk zip.
+5. Reboot. Install the Nethunter App and NH Terminal via Nethunter Store ([https://store.nethunter.com/](https://store.nethunter.com/)) if they didnt get installed already.
+6. Give nethunter app and terminal all permissions it asks for. Open Nethunter app and navigate to "Kali Chroot Manager" and make sure kali chroot is getting set up and started correctly.
+7. Profit
+</Aside>
+
+### 按键坏掉时的处理办法
+
+<Aside type="note" title="按键故障处理">
+whyred长按电源键开关机，长按电源+音量减进入bootloader，长按电源+音量加进入recovery。
+
+- **电源键坏的情况**：
+  - 能开机则使用 `adb reboot bootloader` 或 `adb reboot recovery`
+  - 不能开机只能维修
+
+- **音量减坏情况**：
+  - 进recovery开机再用adb
+
+- **音量加坏的情况**：
+  - 法一：fastboot线刷完整包开机
+  - 法二：`fastboot reboot recovery`
+  - 如果上面命令导致重复启动，回到fastboot刷入twrp开机：`fastboot boot twrp.img`
+</Aside>
+
+## 遇到的问题
+
+### 刷rootfs包失败
+
+**问题**：刷rootfs包提示成功但实际失败。
+
+**原因**：提示必须要完成安卓向导。
+
+### 找不到LineageOS官方包
+
+**解决方案**：先刷入魔趣并完成向导
+
+- [删库跑路 - 马丁龙猪的博客](https://blog.mokeedev.com/2023/01/1437/)
+- [MoKee Open Source Project - Browse Files at SourceForge.net](https://sourceforge.net/projects/mokee/files/)
+
+### 内存不足问题
+
+**问题**：刷kalifs包full版本失败，提示内存不足。
+
+**解决方案**：刷mini版本，成功。
+
+### 权限问题
+
+**问题**：包中安装的kali应用即使给所有权限也提示权限不足。
+
+**可能原因**：通用包有些地方不匹配，需要进一步研究。
+
+## 相关文章
+
+- [[xiaomicc9miunlockfastboot|小米CC9使用MiUnlock进入Fastboot自动关机或重启]]
+- [[redminote5fastboot|RedmiNote5无法进入fastboot屏幕无输出救砖]]
+
+## 总结
+
+在Redmi Note5上刷入NetHunter需要：
+
+1. 解锁Bootloader
+2. 刷入开发版并获取root权限
+3. 安装TWRP和Magisk
+4. 刷入魔趣系统并完成向导
+5. 刷入NetHunter通用包和内核
+6. 安装NetHunter应用并配置权限
+
+整个过程需要注意按键故障的处理方法，以及内存和权限相关的问题。
+

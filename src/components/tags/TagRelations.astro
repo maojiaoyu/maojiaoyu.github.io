@@ -1,0 +1,324 @@
+---
+interface RelatedTag {
+  name: string
+  count: number
+}
+
+interface RelatedPost {
+  id: string
+  href: string
+  title: string
+  tags: string[]
+}
+
+interface Props {
+  tag: string
+  relatedTags: RelatedTag[]
+  posts: RelatedPost[]
+}
+
+const { tag, relatedTags, posts } = Astro.props
+const graphData = JSON.stringify({ tag, relatedTags, posts }).replace(/</g, '\\u003c')
+---
+
+{
+  relatedTags.length > 0 && (
+    <section class='tag-relations animate' aria-labelledby='tag-relations-title' data-tag-relations>
+      <div class='tag-relations__header'>
+        <div>
+          <span class='tag-relations__eyebrow'>Topic connections</span>
+          <h2 id='tag-relations-title'>Related tags</h2>
+          <p>Tags that appear together with #{tag} in the same posts.</p>
+        </div>
+
+        <button
+          class='tag-relations__toggle'
+          type='button'
+          aria-expanded='false'
+          aria-controls='tag-relations-graph'
+          data-tag-graph-toggle
+        >
+          <span data-toggle-label>View graph</span>
+          <svg viewBox='0 0 24 24' aria-hidden='true'>
+            <path d='m9 18 6-6-6-6' />
+          </svg>
+        </button>
+      </div>
+
+      <ul class='tag-relations__list'>
+        {relatedTags.map(({ name, count }) => (
+          <li>
+            <a href={`/tags/${encodeURIComponent(name)}`} data-astro-prefetch>
+              <span class='tag-relations__name'>
+                <span aria-hidden='true'>#</span>
+                {name}
+              </span>
+              <span class='tag-relations__count'>
+                {count} shared {count === 1 ? 'post' : 'posts'}
+              </span>
+              <span class='tag-relations__arrow' aria-hidden='true'>
+                ↗
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <div id='tag-relations-graph' class='tag-relations__graph' data-tag-graph hidden>
+        <div class='tag-relations__legend' aria-hidden='true'>
+          <span>
+            <i class='is-current' />
+            Current tag
+          </span>
+          <span>
+            <i class='is-post' />
+            Post
+          </span>
+          <span>
+            <i class='is-tag' />
+            Related tag
+          </span>
+        </div>
+        <div class='tag-relations__canvas' data-tag-graph-canvas>
+          <p data-tag-graph-status>Preparing graph...</p>
+        </div>
+        <p class='tag-relations__hint'>Drag nodes to rearrange. Select a node to open it.</p>
+      </div>
+
+      <script is:inline type='application/json' data-tag-graph-data set:html={graphData} />
+    </section>
+  )
+}
+
+<script>
+  import('./tag-relations').then(({ setupTagRelations }) => setupTagRelations())
+</script>
+
+<style>
+  .tag-relations {
+    margin-top: 2.75rem;
+    padding: clamp(1.1rem, 3vw, 1.5rem);
+    border: 1px solid hsl(var(--border));
+    border-radius: 1.35rem;
+    background: hsl(var(--background));
+  }
+
+  .tag-relations__header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.25rem;
+  }
+
+  .tag-relations__eyebrow {
+    color: hsl(var(--primary));
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .tag-relations h2 {
+    margin: 0.15rem 0 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .tag-relations__header p {
+    margin: 0.3rem 0 0;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.78rem;
+  }
+
+  .tag-relations__toggle {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.8rem;
+    background: hsl(var(--muted) / 0.55);
+    color: hsl(var(--foreground));
+    cursor: pointer;
+    font-size: 0.78rem;
+    transition:
+      border-color 180ms ease,
+      color 180ms ease,
+      background 180ms ease;
+  }
+
+  .tag-relations__toggle:hover {
+    border-color: hsl(var(--primary) / 0.55);
+    background: hsl(var(--primary) / 0.08);
+    color: hsl(var(--primary));
+  }
+
+  .tag-relations__toggle svg {
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+    transition: transform 180ms ease;
+  }
+
+  .tag-relations__toggle[aria-expanded='true'] svg {
+    transform: rotate(90deg);
+  }
+
+  .tag-relations__list {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 0.55rem;
+    margin: 1.15rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .tag-relations__list a {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid hsl(var(--border) / 0.75);
+    border-radius: 0.85rem;
+    background: hsl(var(--muted) / 0.28);
+    color: hsl(var(--foreground));
+    text-decoration: none;
+    transition:
+      border-color 180ms ease,
+      background 180ms ease;
+  }
+
+  .tag-relations__list a:hover {
+    border-color: hsl(var(--primary) / 0.5);
+    background: hsl(var(--primary) / 0.06);
+    color: hsl(var(--foreground));
+  }
+
+  .tag-relations__name {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 0.85rem;
+    font-weight: 550;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .tag-relations__name > span {
+    color: hsl(var(--primary));
+  }
+
+  .tag-relations__count {
+    color: hsl(var(--muted-foreground));
+    font-size: 0.7rem;
+  }
+
+  .tag-relations__arrow {
+    color: hsl(var(--muted-foreground));
+    font-size: 0.8rem;
+  }
+
+  .tag-relations__graph {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid hsl(var(--border));
+  }
+
+  .tag-relations__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem 1.1rem;
+    margin-bottom: 0.65rem;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.68rem;
+  }
+
+  .tag-relations__legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .tag-relations__legend i {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 999px;
+  }
+
+  .tag-relations__legend .is-current {
+    background: hsl(var(--primary));
+  }
+
+  .tag-relations__legend .is-post {
+    background: hsl(var(--muted-foreground) / 0.65);
+  }
+
+  .tag-relations__legend .is-tag {
+    border: 2px solid hsl(var(--primary) / 0.7);
+    background: hsl(var(--background));
+  }
+
+  .tag-relations__canvas {
+    position: relative;
+    height: clamp(20rem, 48vw, 31rem);
+    overflow: hidden;
+    border: 1px solid hsl(var(--border));
+    border-radius: 1rem;
+    background:
+      radial-gradient(circle at center, hsl(var(--primary) / 0.055), transparent 48%),
+      hsl(var(--muted) / 0.2);
+  }
+
+  .tag-relations__canvas > p {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    margin: 0;
+    place-items: center;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.8rem;
+  }
+
+  .tag-relations__canvas :global(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .tag-relations__hint {
+    margin: 0.55rem 0 0;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.68rem;
+    text-align: right;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  @media (min-width: 640px) {
+    .tag-relations__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 639px) {
+    .tag-relations__header {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .tag-relations__toggle {
+      align-self: flex-start;
+    }
+
+    .tag-relations__count {
+      display: none;
+    }
+  }
+</style>

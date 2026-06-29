@@ -1,0 +1,186 @@
+---
+import { Icon } from 'astro-pure/user'
+import Sponsors from './Sponsors.astro'
+
+interface Props {
+  sponsors: {
+    name: string
+    platform?: string
+    amount: number
+    date: string
+  }[]
+  progressMax?: number
+}
+
+const { sponsors, progressMax = 50 } = Astro.props
+---
+
+<dialog class='sponsors-overlay' data-sponsors-overlay transition:persist='sponsors-overlay'>
+  <div class='sponsors-modal'>
+    <header class='sponsors-header'>
+      <div class='sponsors-title'>
+        <Icon name='receive-money' class='sponsors-icon' />
+        <strong>全部赞助者 / All Sponsors</strong>
+      </div>
+      <button type='button' aria-label='关闭' data-sponsors-close>×</button>
+    </header>
+    <div class='sponsors-content'>
+      <Sponsors sponsors={sponsors} progressMax={progressMax} />
+    </div>
+  </div>
+</dialog>
+
+<script>
+  function setupSponsorsOverlay() {
+    const dialog = document.querySelector<HTMLDialogElement>('[data-sponsors-overlay]')
+    if (!dialog) return
+
+    const openBtns = document.querySelectorAll('[data-sponsors-trigger]')
+    const closeBtn = dialog.querySelector('[data-sponsors-close]')
+
+    openBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        dialog.showModal()
+        document.documentElement.classList.add('sponsors-open')
+      })
+    })
+
+    closeBtn?.addEventListener('click', () => {
+      dialog.close()
+    })
+
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) dialog.close()
+    })
+
+    dialog.addEventListener('close', () => {
+      document.documentElement.classList.remove('sponsors-open')
+    })
+  }
+
+  setupSponsorsOverlay()
+  document.addEventListener('astro:page-load', setupSponsorsOverlay)
+</script>
+
+<style>
+  :global(html.sponsors-open) {
+    overflow: hidden;
+  }
+
+  .sponsors-overlay {
+    width: min(50rem, calc(100vw - 2rem));
+    max-width: none;
+    max-height: calc(100dvh - 4rem);
+    padding: 0;
+    border: 0;
+    color: hsl(var(--foreground));
+    background: transparent;
+    overflow: visible;
+    outline: none;
+    opacity: 0;
+    translate: 0 12px;
+    scale: 0.98;
+    transition:
+      opacity 200ms ease,
+      translate 200ms ease,
+      scale 200ms ease,
+      overlay 200ms ease allow-discrete,
+      display 200ms ease allow-discrete;
+  }
+
+  .sponsors-overlay[open] {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+
+  @starting-style {
+    .sponsors-overlay[open] {
+      opacity: 0;
+      translate: 0 12px;
+      scale: 0.98;
+    }
+  }
+
+  .sponsors-overlay::backdrop {
+    background: hsl(var(--foreground) / 0.18);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition:
+      opacity 200ms ease,
+      backdrop-filter 200ms ease,
+      overlay 200ms ease allow-discrete,
+      display 200ms ease allow-discrete;
+  }
+
+  @starting-style {
+    .sponsors-overlay[open]::backdrop {
+      opacity: 0;
+      backdrop-filter: blur(0);
+    }
+  }
+
+  .sponsors-modal {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-height: calc(100dvh - 4rem);
+    overflow: hidden;
+    border: 1px solid hsl(var(--border));
+    border-radius: 1.35rem;
+    background: hsl(var(--background) / 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow:
+      0 14px 50px rgba(27, 33, 48, 0.08),
+      0 10px 30px rgba(27, 33, 48, 0.1);
+  }
+
+  .sponsors-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid hsl(var(--border));
+    background: hsl(var(--muted) / 0.25);
+  }
+
+  .sponsors-title {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-size: 1rem;
+  }
+
+  .sponsors-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: hsl(var(--primary));
+  }
+
+  .sponsors-header button {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border: 0;
+    border-radius: 999px;
+    color: hsl(var(--muted-foreground));
+    background: hsl(var(--muted) / 0.55);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 120ms ease;
+  }
+
+  .sponsors-header button:hover {
+    background: hsl(var(--muted));
+    color: hsl(var(--foreground));
+  }
+
+  .sponsors-content {
+    padding: 1.5rem;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+</style>

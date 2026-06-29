@@ -1,0 +1,240 @@
+---
+title: Word写论文的各种奇怪要求怎么解决
+publishDate: "2025-06-02 05:33:30"
+description: Word写论文时遇到的各种奇怪格式要求的解决方案，包括公式编号、交叉引用、域代码等
+tags:
+  - Word
+  - 文档编写
+  - 论文
+draft: false
+comment: true
+language: 中文
+---
+
+import { Aside } from 'astro-pure/user'
+
+## 概述
+
+使用Word写论文时，经常会遇到各种奇怪的格式要求，如公式自动编号、交叉引用、自定义标号等。本文总结了这些问题的解决方案。
+
+## 必要功能快捷键
+
+### 域代码相关
+
+- **ALT + F9** - 显示域代码
+- **CTRL + F9** - 创建域括号`{}`，域代码与域括号间要有1个空格
+- **CTRL + ALT + ENTER** - 样式分隔符（抽取下一行的回车将其转变为样式分隔符，要提前预留下一行的回车）
+
+<Aside type="tip">
+样式分隔符与回车都是某一部分样式的标志，所以改变这个符号的样式就是改变整个部分的样式。同样的，这个符号也是引用、编号、域的界限与标志。
+</Aside>
+
+### 其他快捷键
+
+- **CTRL + \*** - 显示隐藏编辑标记（方便看不显示的符号）
+- **ALT + =** - 转换为公式
+- **CTRL + P** - 打印预览（作用为刷新全局域）
+
+## 公式相关
+
+### 公式编辑器选择
+
+<Aside type="note">
+MathType等插件很难批量自定义格式，建议使用Word自带公式编辑器。
+</Aside>
+
+### LaTeX公式转换
+
+LaTeX公式要转换为专业格式，推荐使用公式`#+enter`进行编号。
+
+### 公式对齐和换行
+
+- `&` - 对齐
+- `\\\\` - 换行
+
+这些基本操作都与LaTeX语法一致。
+
+### 公式编号和交叉引用
+
+- 编号加域来交叉引用，方便后面批量编辑编号格式
+- 多用格式刷解决复杂的格式问题
+
+参考资源：
+- [Word中公式自动编号及交叉引用的解决方案 - 知乎](https://zhuanlan.zhihu.com/p/109212246)
+
+### 公式换行
+
+操作方形公式框，右键新建行删除行。
+
+参考资源：
+- [Word多行公式的换行、对齐与编号 - 知乎](https://zhuanlan.zhihu.com/p/439988361)
+
+## 自定义标号
+
+### 类似于(1-1)的编号
+
+<Aside type="tip">
+下面第一种适用于不想更新原来的编号方式，因为做了太多引用的情况。否则建议统一用第二种方式。
+</Aside>
+
+**方法**：
+
+1. 多级列表设置1级和2级编号的样式，2级为实际想要的标号，1级是为了分辨章节
+2. 在listnum多级列表设置完毕后，在新的一行添加一个样式为(1-0)编号，如下，并刷白：
+
+```
+{LISTNUM  Equation \l 2 \s 0 } 
+```
+
+3. 每一章标题后设置样式为1的一级标号，如下，并刷白：
+
+```
+{ LISTNUM Equation \l 1 }
+```
+
+4. 其他部分正常编号即可
+5. 交叉引用对应编号即可
+
+### 定理编号以及引用
+
+**问题**：如果章节编号为中文大写，那么直接插入题注会是"一.1"，需要格式为"1.1"。
+
+**解决方案**：
+
+1. 每章标题后插入如下域：
+
+```
+{ SEQ seq \h }
+```
+
+2. 新建的题注改为如下样式：
+
+```
+引理 { SEQ seq \c }{ SEQ 引理 \* ARABIC \s 1}
+```
+
+3. 交叉引用使用整项题注，在不需要引用的内容前插入样式分隔符
+
+### 引用编号类似于[3,5,9]
+
+```
+{ REF _Refxxxxxxxxx \r \h \#"[0"  \* MERGEFORMAT },{ REF _Refxxxxxxxxx \r \h \#"0"  \* MERGEFORMAT },{ REF _Refxxxxxxxxx \r \h \#"0]"  \* MERGEFORMAT }
+
+\#"[0"
+\#"0"
+\#"0]"
+```
+
+## 域相关资源
+
+- [Word 中的域代码列表 - Microsoft 支持](https://support.microsoft.com/zh-cn/office/word-%E4%B8%AD%E7%9A%84%E5%9F%9F%E4%BB%A3%E7%A0%81%E5%88%97%E8%A1%A8-1ad6d91a-55a7-4a8d-b535-cf7888659a51)
+- [一篇文章教会你使用word域代码（seq field code ）_word文档域的使用 seq-CSDN博客](https://blog.csdn.net/songchuwang1868/article/details/104816016)
+
+## 引用排序
+
+### 文献管理工具
+
+可以用Zotero等进行文献管理。
+
+### 排序工具
+
+- [GitHub - Casxt/SortReference: Sort the bibliography by citation order.](https://github.com/Casxt/SortReference)
+- [检查word里参考文献引用依出现先后顺序排列（半自动化）_word参考文献按照引用顺序排序-CSDN博客](https://blog.csdn.net/Zjhao666/article/details/123494160)
+
+<Aside type="caution">
+上面的方法需要手动排序，且如果参考文献列表为编号形式，那么不会修改这些编号（可能是因为编号会自动更新不必刷新域）。
+</Aside>
+
+### 更新逻辑
+
+上面更新逻辑为先计算好再全部替换更新，即：
+
+```python
+count = {}
+new_id = {}
+for ref in ref_order:
+    if ref in count:
+        count[ref] += 1
+    else:
+        count[ref] = 1
+        new_id[ref] = str(len(count))
+```
+
+### 引用丢失问题的解决方案
+
+如果你的引用方法，使用上面的排序方法会造成引用丢失或者乱套，可以用下面方法：
+
+```python
+def simulate_adjusted_renumbering(refs):
+    """
+    输入：
+      refs: 原始引用编号列表，例如 [20, 24, 21]
+    输出：
+      一个列表，每项对应一条替换记录，
+      格式为 (old, adjusted, new)：
+        old      = 原始编号
+        adjusted = 实施完成前面所有步骤后并刷新域后的编号，称为调整后编号
+        new      = i+1（第 i 个引用的新编号,调整后的编号应该插入的位置）
+    """
+    steps = []
+    for i, old in enumerate(refs):
+        # 计算之前出现的，且原编号 > 当前 old 的数量
+        count = sum(1 for prev in refs[:i] if prev > old)
+        adjusted = old + count
+        new = i + 1
+        steps.append((old, adjusted, new))
+    return steps
+
+# 示例：
+refs = [20, 24, 21,7,2,45,3,23]
+for old, adjusted, new in simulate_adjusted_renumbering(refs):
+    print(f"[{old}-{adjusted}-{new}]")
+
+#输出[20-20-1][24-24-2][21-22-3][7-10-4][2-6-5][45-45-6][3-8-7][23-25-8]
+```
+
+更新逻辑为每替换一个（将原本编号的引用移动到新的编号位置）后刷新域重排编号再重复。
+
+<Aside type="note">
+自动保证不出错误的流程应该为：
+先查具体格式，替换格式（不要选中最后的空格以及回车），替换到正确的编号所在的文献之前（复制包含回车的项，复制到正确位置文献的第一个字前），刷新编号的域。找到下一个编号，首先刷新编号的域，然后重复上面的过程。
+
+暂未封装，可参考上面github处理word的逻辑。
+</Aside>
+
+## 常见问题
+
+### 不建议使用书签
+
+<Aside type="tip">
+不建议用书签等方式，建议全部用域，方便自动化与批量操作。
+</Aside>
+
+### 更新编号方式
+
+更新编号方式后，原来的引用会失效，需要重新设置。
+
+### 自定义格式丢失
+
+在复制新的word文档或一些奇怪的操作后，自定义的多级列表、编号格式、题注等有可能被删掉。
+
+**解决方案**：删掉之后再想插入，就复制域代码即可。
+
+### 对齐问题
+
+遇到奇怪的对齐问题，优先看下段落缩进。
+
+## 总结
+
+<Aside type="caution">
+对于数学类文章，Word排版比起LaTeX困难很多。如果可能，建议使用LaTeX编写数学类论文。
+</Aside>
+
+Word写论文时需要注意：
+
+1. 使用域代码进行自动编号和交叉引用
+2. 掌握必要的快捷键提高效率
+3. 使用格式刷处理复杂格式
+4. 避免使用书签，统一使用域
+5. 定期备份，防止格式丢失
+

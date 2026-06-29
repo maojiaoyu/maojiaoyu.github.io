@@ -1,0 +1,246 @@
+---
+import { getBlogCollection, getUniqueTagsWithCount } from 'astro-pure/server'
+import { Icon } from 'astro-pure/user'
+
+const allPosts = await getBlogCollection()
+const allTags = getUniqueTagsWithCount(allPosts).sort(
+  ([tagA, countA], [tagB, countB]) =>
+    countB - countA || tagA.localeCompare(tagB, undefined, { sensitivity: 'base' })
+)
+const maxTagCount = Math.max(...allTags.map(([, count]) => count), 1)
+---
+
+<dialog class='tagcloud-overlay' data-tagcloud-overlay transition:persist='tagcloud-overlay'>
+  <div class='tagcloud-modal'>
+    <header class='tagcloud-header'>
+      <div class='tagcloud-title'>
+        <Icon name='hashtag' class='tagcloud-icon' />
+        <strong>标签云 / Tag Cloud</strong>
+      </div>
+      <button type='button' aria-label='关闭' data-tagcloud-close>×</button>
+    </header>
+    <div class='tagcloud-content'>
+      <div class='tag-cloud-wrapper'>
+        {allTags.map(([tag, count]) => {
+          // Calculate relative size between 0.8rem and 1.8rem
+          const ratio = Math.pow(count / maxTagCount, 0.5); // non-linear scaling
+          const size = 0.8 + ratio * 1.0;
+          const opacity = 0.6 + ratio * 0.4;
+          return (
+            <a 
+              href={`/tags/${encodeURIComponent(tag)}`} 
+              class='tag-cloud-item'
+              style={`--tag-size: ${size}rem; --tag-opacity: ${opacity};`}
+            >
+              <span class='tag-hash'>#</span>{tag}
+              <span class='tag-count'>{count}</span>
+            </a>
+          )
+        })}
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  function setupTagCloud() {
+    const dialog = document.querySelector<HTMLDialogElement>('[data-tagcloud-overlay]')
+    if (!dialog) return
+
+    const openBtns = document.querySelectorAll('[data-tagcloud-trigger]')
+    const closeBtn = dialog.querySelector('[data-tagcloud-close]')
+
+    openBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        dialog.showModal()
+        document.documentElement.classList.add('tagcloud-open')
+      })
+    })
+
+    closeBtn?.addEventListener('click', () => {
+      dialog.close()
+    })
+
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) dialog.close()
+    })
+
+    dialog.addEventListener('close', () => {
+      document.documentElement.classList.remove('tagcloud-open')
+    })
+  }
+
+  setupTagCloud()
+  document.addEventListener('astro:page-load', setupTagCloud)
+</script>
+
+<style>
+  :global(html.tagcloud-open) {
+    overflow: hidden;
+  }
+
+  .tagcloud-overlay {
+    width: min(50rem, calc(100vw - 2rem));
+    max-width: none;
+    max-height: calc(100dvh - 4rem);
+    padding: 0;
+    border: 0;
+    color: hsl(var(--foreground));
+    background: transparent;
+    overflow: visible;
+    outline: none;
+    opacity: 0;
+    translate: 0 12px;
+    scale: 0.98;
+    transition:
+      opacity 200ms ease,
+      translate 200ms ease,
+      scale 200ms ease,
+      overlay 200ms ease allow-discrete,
+      display 200ms ease allow-discrete;
+  }
+
+  .tagcloud-overlay[open] {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+
+  @starting-style {
+    .tagcloud-overlay[open] {
+      opacity: 0;
+      translate: 0 12px;
+      scale: 0.98;
+    }
+  }
+
+  .tagcloud-overlay::backdrop {
+    background: hsl(var(--foreground) / 0.18);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition:
+      opacity 200ms ease,
+      backdrop-filter 200ms ease,
+      overlay 200ms ease allow-discrete,
+      display 200ms ease allow-discrete;
+  }
+
+  @starting-style {
+    .tagcloud-overlay[open]::backdrop {
+      opacity: 0;
+      backdrop-filter: blur(0);
+    }
+  }
+
+  .tagcloud-modal {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-height: calc(100dvh - 4rem);
+    overflow: hidden;
+    border: 1px solid hsl(var(--border));
+    border-radius: 1.35rem;
+    background: hsl(var(--background) / 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow:
+      0 14px 50px rgba(27, 33, 48, 0.08),
+      0 10px 30px rgba(27, 33, 48, 0.1);
+  }
+
+  .tagcloud-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid hsl(var(--border));
+    background: hsl(var(--muted) / 0.25);
+  }
+
+  .tagcloud-title {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-size: 1rem;
+  }
+
+  .tagcloud-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: hsl(var(--primary));
+  }
+
+  .tagcloud-header button {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border: 0;
+    border-radius: 999px;
+    color: hsl(var(--muted-foreground));
+    background: hsl(var(--muted) / 0.55);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 120ms ease;
+  }
+
+  .tagcloud-header button:hover {
+    background: hsl(var(--muted));
+    color: hsl(var(--foreground));
+  }
+
+  .tagcloud-content {
+    padding: 1.5rem;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  .tag-cloud-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.8rem 1.2rem;
+  }
+
+  .tag-cloud-item {
+    display: inline-flex;
+    align-items: baseline;
+    font-size: var(--tag-size);
+    opacity: var(--tag-opacity);
+    color: hsl(var(--foreground));
+    text-decoration: none;
+    transition: all 0.2s ease;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.5rem;
+  }
+
+  .tag-cloud-item:hover {
+    opacity: 1 !important;
+    color: hsl(var(--primary));
+    background: hsl(var(--primary) / 0.1);
+    transform: translateY(-2px);
+  }
+
+  .tag-hash {
+    color: hsl(var(--primary) / 0.7);
+    margin-right: 0.1em;
+    font-size: 0.9em;
+  }
+
+  .tag-count {
+    font-size: 0.45em;
+    color: hsl(var(--muted-foreground));
+    margin-left: 0.3em;
+    background: hsl(var(--muted));
+    padding: 0.1rem 0.35rem;
+    border-radius: 999px;
+    vertical-align: super;
+  }
+
+  .tag-cloud-item:hover .tag-count {
+    color: hsl(var(--primary));
+    background: hsl(var(--primary) / 0.2);
+  }
+</style>

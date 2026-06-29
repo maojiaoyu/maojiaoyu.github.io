@@ -1,0 +1,90 @@
+---
+title: CC9虚拟位置
+publishDate: "2025-03-02 22:19:29"
+description: 关于小米CC9使用LineageOS和LSPosed框架实现虚拟位置功能的详细教程
+tags:
+  - Flash
+  - Android
+  - LineageOS
+draft: false
+comment: true
+language: 中文
+---
+
+import { Aside } from 'astro-pure/user'
+
+## 概述
+
+本教程将介绍如何在小米CC9上通过刷入LineageOS和使用LSPosed框架来实现虚拟位置功能。这对于需要使用位置相关应用但不想暴露真实位置的用户非常有用。
+
+## 前置准备
+
+在开始之前，请确保你已经：
+
+- 解锁了小米CC9的Bootloader
+- 备份了重要数据
+- 了解刷机风险并愿意承担
+
+<Aside type="caution">
+刷机有风险，可能导致设备变砖。请确保你已经充分了解相关风险，并做好数据备份。
+</Aside>
+
+## 相关资源
+
+### LineageOS 资源
+
+- [LineageOS Changelog](https://www.lineageoslog.com/) - 查看LineageOS更新日志
+- [主页 - LineageOS ROMs](https://lineageosroms.com/) - LineageOS ROM下载页面
+
+<Aside type="tip">
+LSPosed目前不支持安卓15，因此需要刷入较老版本的LineageOS。建议使用安卓13或14的版本。
+</Aside>
+
+### LSPosed 框架
+
+- [LSPosed/LSPosed: LSPosed Framework](https://github.com/LSPosed/LSPosed) - LSPosed框架官方仓库
+
+### 相关模块
+
+- **锤锤改位置** - 用于修改应用获取的位置信息
+- **HMA屏蔽系统监测** - 用于隐藏应用列表，防止被检测
+  - [Dr-TSNG/Hide-My-Applist: An Xposed module to intercept applist detections](https://github.com/Dr-TSNG/Hide-My-Applist)
+  - [Xposed-Modules-Repo/com.fuck.android.rimet: 锤锤](https://github.com/Xposed-Modules-Repo/com.fuck.android.rimet)
+
+## 安装步骤
+
+### 1. 刷入LineageOS
+
+1. 下载适合小米CC9的LineageOS ROM（确保版本为安卓13或14）
+2. 进入Recovery模式
+3. 执行完整的数据清除（Wipe Data/Factory Reset）
+4. 刷入LineageOS ROM
+5. 重启系统
+
+### 2. 安装LSPosed
+
+1. 下载LSPosed框架的ZIP包
+2. 在Recovery模式下刷入LSPosed
+3. 重启系统后，LSPosed管理器应该已经安装
+
+### 3. 配置虚拟位置
+
+1. 打开LSPosed管理器
+2. 安装"锤锤"模块并启用
+3. 在LSPosed中激活"锤锤"模块，并选择需要修改位置的应用
+4. 安装"Hide My Applist"模块以防止系统检测
+
+<Aside type="tip">
+建议先在一个不重要的应用上测试，确保功能正常后再应用到重要应用。
+</Aside>
+
+## 注意事项
+
+- 某些应用可能会检测Xposed框架的存在，使用Hide My Applist可以有效避免被检测
+- 虚拟位置功能可能不适用于所有应用，部分应用可能会使用其他方式检测位置
+- 定期更新LSPosed和模块以获得最佳兼容性
+
+## 总结
+
+通过以上步骤，你可以在小米CC9上成功实现虚拟位置功能。记住要谨慎使用，遵守相关法律法规。
+

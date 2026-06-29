@@ -1,0 +1,106 @@
+---
+import { render, type CollectionEntry } from 'astro:content'
+
+import { getBlogCollection, sortMDByDate } from 'astro-pure/server'
+import PostLayout from '@/layouts/BlogPost.astro'
+import {
+  buildBacklinksMap,
+  getBacklinksForPost,
+  getOutgoingLinks,
+  type Backlink
+} from '@/utils/backlinks'
+import { getPostSlug } from '@/utils/content-paths'
+
+export const prerender = true
+
+export async function getStaticPaths() {
+  const posts = sortMDByDate(await getBlogCollection()) as CollectionEntry<'blog'>[]
+  // Build backlinks map for all posts
+  const backlinksMap = await buildBacklinksMap(posts, '/blog')
+  const slugOwners = new Map<string, string>()
+
+  for (const post of posts) {
+    const slug = getPostSlug(post)
+    const existingId = slugOwners.get(slug)
+    if (existingId && existingId !== post.id) {
+      throw new Error(
+        `Duplicate blog slug "${slug}" for "${existingId}" and "${post.id}". ` +
+          'Add an explicit unique slug to one of the posts.'
+      )
+    }
+    slugOwners.set(slug, post.id)
+  }
+
+  return posts.flatMap((post) => {
+    // Pre-compute backlinks and outgoing links for each post
+    const backlinks = getBacklinksForPost(backlinksMap, post.id)
+    const outgoingLinks = getOutgoingLinks(post, posts, '/blog')
+
+    const canonicalSlug = getPostSlug(post)
+    const paths = [
+      {
+        params: { id: canonicalSlug },
+        props: {
+          post,
+          posts,
+          backlinks,
+          outgoingLinks,
+          redirectTo: undefined as string | undefined
+        }
+      }
+    ]
+
+    if (canonicalSlug !== post.id) {
+      paths.push({
+        params: { id: post.id },
+        props: {
+          post,
+          posts,
+          backlinks,
+          outgoingLinks,
+          redirectTo: `/blog/${canonicalSlug}`
+        }
+      })
+    }
+
+    // Add a redirect from the bare filename to support wikilinks that don't include the category path
+    const bareFilename = post.id.split('/').at(-1)
+    if (bareFilename && bareFilename !== canonicalSlug && bareFilename !== post.id) {
+      paths.push({
+        params: { id: bareFilename },
+        props: {
+          post,
+          posts,
+          backlinks,
+          outgoingLinks,
+          redirectTo: `/blog/${canonicalSlug}`
+        }
+      })
+    }
+
+    return paths
+  })
+}
+
+type Props = {
+  post: CollectionEntry<'blog'>
+  posts: CollectionEntry<'blog'>[]
+  backlinks: Backlink[]
+  outgoingLinks: Backlink[]
+  redirectTo?: string
+}
+
+const { post, posts, backlinks, outgoingLinks, redirectTo } = Astro.props
+
+if (redirectTo) {
+  const targetUrl = new URL(redirectTo, Astro.url)
+  targetUrl.search = Astro.url.search
+  return Astro.redirect(targetUrl.pathname + targetUrl.search, 301)
+}
+
+const { Content, headings, remarkPluginFrontmatter } = await render(post)
+---
+
+<PostLayout {post} {posts} {headings} {remarkPluginFrontmatter} {backlinks} {outgoingLinks}>
+  <Content />
+</PostLayout>

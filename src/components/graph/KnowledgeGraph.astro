@@ -1,0 +1,648 @@
+<dialog
+  class='knowledge-graph-dialog'
+  data-knowledge-graph-dialog
+  aria-labelledby='knowledge-graph-title'
+  transition:persist='knowledge-graph-overlay'
+>
+  <div class='graph-dialog-header'>
+    <div>
+      <span>Knowledge explorer</span>
+      <h2 id='knowledge-graph-title'>知识图谱</h2>
+    </div>
+    <button type='button' data-graph-close aria-label='关闭知识图谱'>
+      <svg viewBox='0 0 24 24' aria-hidden='true'>
+        <path d='M18 6 6 18M6 6l12 12'></path>
+      </svg>
+    </button>
+  </div>
+
+  <section class='knowledge-graph' data-knowledge-graph>
+    <aside class='graph-controls' aria-label='图谱控制'>
+      <label class='graph-search'>
+        <span>搜索节点</span>
+        <input type='search' placeholder='文章、文档、标签...' data-graph-search />
+        <div data-graph-suggestions hidden></div>
+      </label>
+
+      <fieldset>
+        <legend>范围</legend>
+        <div class='segmented' data-graph-scope>
+          <button type='button' data-value='all'>全部</button>
+          <button type='button' data-value='blog'>Blog</button>
+          <button type='button' data-value='docs'>Docs</button>
+          <button type='button' data-value='tags'>标签</button>
+          <button type='button' data-value='categories'>分类</button>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>节点</legend>
+        <div class='check-grid'>
+          <label><input type='checkbox' value='blog' data-node-type checked />文章</label>
+          <label><input type='checkbox' value='docs' data-node-type checked />文档</label>
+          <label><input type='checkbox' value='tag' data-node-type checked />标签</label>
+          <label><input type='checkbox' value='category' data-node-type checked />分类</label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>关系</legend>
+        <div class='check-grid'>
+          <label><input type='checkbox' value='citation' data-edge-type checked />引用</label>
+          <label><input type='checkbox' value='tag' data-edge-type checked />标签归属</label>
+          <label><input type='checkbox' value='category' data-edge-type checked />分类归属</label>
+          <label><input type='checkbox' value='co-tag' data-edge-type checked />标签共现</label>
+        </div>
+      </fieldset>
+
+      <div class='select-grid'>
+        <label>
+          <span>方向</span>
+          <select data-graph-direction>
+            <option value='mixed'>混合语义</option>
+            <option value='directed'>全部有向</option>
+            <option value='undirected'>全部无向</option>
+          </select>
+        </label>
+        <label>
+          <span>布局</span>
+          <select data-graph-layout>
+            <option value='force'>力导向</option>
+            <option value='radial'>径向</option>
+          </select>
+        </label>
+        <label>
+          <span>邻居深度</span>
+          <select data-graph-depth>
+            <option value='0'>全部网络</option>
+            <option value='1'>一度邻居</option>
+            <option value='2'>二度邻居</option>
+            <option value='3'>三度邻居</option>
+          </select>
+        </label>
+        <label>
+          <span>引用方向</span>
+          <select data-graph-flow>
+            <option value='all'>全部引用</option>
+            <option value='incoming'>仅入链</option>
+            <option value='outgoing'>仅出链</option>
+          </select>
+        </label>
+      </div>
+
+      <label class='isolated-toggle'>
+        <input type='checkbox' data-graph-isolated />
+        仅显示孤立节点
+      </label>
+
+      <div class='graph-actions'>
+        <button type='button' data-graph-reset>重置视图</button>
+        <button type='button' data-graph-clear>恢复默认</button>
+      </div>
+    </aside>
+
+    <div class='graph-workspace'>
+      <header>
+        <div>
+          <strong data-graph-title>全部知识</strong>
+          <span data-graph-stats>准备图谱...</span>
+        </div>
+        <div class='graph-legend' aria-label='节点图例'>
+          <span><i class='is-blog'></i>文章</span>
+          <span><i class='is-docs'></i>文档</span>
+          <span><i class='is-tag'></i>标签</span>
+          <span><i class='is-category'></i>分类</span>
+        </div>
+      </header>
+
+      <div class='graph-canvas' data-graph-canvas>
+        <p data-graph-status>正在加载知识网络...</p>
+      </div>
+
+      <footer>
+        <span>拖动节点 · 滚动缩放 · 单击查看详情 · 双击打开页面</span>
+      </footer>
+    </div>
+
+    <aside class='graph-details' data-graph-details>
+      <span>Node inspector</span>
+      <h2>选择一个节点</h2>
+      <p>查看节点类型、连接数量、入链、出链以及关联页面。</p>
+    </aside>
+  </section>
+</dialog>
+
+<script>
+  function setupGraphOverlay() {
+    const dialog = document.querySelector<HTMLDialogElement>('[data-knowledge-graph-dialog]')
+    if (!dialog) return
+    const overlayWindow = window as Window & { graphOverlayAbort?: AbortController }
+    overlayWindow.graphOverlayAbort?.abort()
+    const controller = new AbortController()
+    overlayWindow.graphOverlayAbort = controller
+    const { signal } = controller
+
+    const open = (href: string) => {
+      const url = new URL(href, location.href)
+      const hashParams = url.hash.includes('?') ? url.hash.slice(url.hash.indexOf('?')) : ''
+      const explicitParams = hashParams || url.search
+      if (explicitParams) dialog.dataset.graphParams = explicitParams
+      if (!dialog.open) dialog.showModal()
+      document.documentElement.classList.add('graph-overlay-open')
+      import('./knowledge-graph').then(({ openKnowledgeGraph }) =>
+        openKnowledgeGraph(dialog, explicitParams || undefined)
+      )
+    }
+
+    document.addEventListener(
+      'click',
+      (event) => {
+        const link = (event.target as Element).closest<HTMLElement>(
+          '[data-graph-open], a[href^="#knowledge-graph"]'
+        )
+        if (!link) return
+        event.preventDefault()
+        open((link as HTMLAnchorElement).href || '#knowledge-graph')
+      },
+      { capture: true, signal }
+    )
+
+    dialog
+      .querySelector('[data-graph-close]')
+      ?.addEventListener('click', () => dialog.close(), { signal })
+    dialog.addEventListener(
+      'click',
+      (event) => {
+        if (event.target === dialog) dialog.close()
+      },
+      { signal }
+    )
+    dialog.addEventListener(
+      'keydown',
+      (event) => {
+        const isInput =
+          document.activeElement?.tagName === 'INPUT' ||
+          document.activeElement?.tagName === 'TEXTAREA'
+        if (event.key === 'q' && !isInput) {
+          event.preventDefault()
+          dialog.close()
+        }
+      },
+      { signal }
+    )
+    dialog.addEventListener(
+      'close',
+      () => {
+        // Blur active element to remove navigation focus artifacts
+        ;(document.activeElement as HTMLElement)?.blur()
+        document.documentElement.classList.remove('graph-overlay-open')
+        if (location.hash.startsWith('#knowledge-graph')) {
+          history.replaceState(null, '', `${location.pathname}${location.search}`)
+        }
+      },
+      { signal }
+    )
+
+    if (location.hash.startsWith('#knowledge-graph')) open(location.href)
+  }
+
+  setupGraphOverlay()
+  document.addEventListener('astro:page-load', setupGraphOverlay)
+</script>
+
+<style>
+  :global(html.graph-overlay-open) {
+    overflow: hidden;
+  }
+
+  .knowledge-graph-dialog {
+    width: min(96rem, calc(100vw - 1.5rem));
+    max-width: none;
+    height: min(56rem, calc(100dvh - 2rem));
+    max-height: none;
+    padding: 0.8rem;
+    border: 1px solid hsl(var(--border));
+    border-radius: 1.4rem;
+    color: hsl(var(--foreground));
+    background: hsl(var(--background) / 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow:
+      0 14px 50px rgba(27, 33, 48, 0.08),
+      0 10px 30px rgba(27, 33, 48, 0.1);
+    opacity: 0;
+    translate: 0 12px;
+    scale: 0.98;
+    transition:
+      opacity 200ms ease,
+      translate 200ms ease,
+      scale 200ms ease,
+      overlay 200ms ease allow-discrete,
+      display 200ms ease allow-discrete;
+  }
+
+  .knowledge-graph-dialog[open] {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+
+  @starting-style {
+    .knowledge-graph-dialog[open] {
+      opacity: 0;
+      translate: 0 12px;
+      scale: 0.98;
+    }
+  }
+
+  .knowledge-graph-dialog::backdrop {
+    background: hsl(var(--foreground) / 0.18);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition:
+      opacity 200ms ease,
+      backdrop-filter 200ms ease,
+      overlay 200ms ease allow-discrete,
+      display 200ms ease allow-discrete;
+  }
+
+  @starting-style {
+    .knowledge-graph-dialog[open]::backdrop {
+      opacity: 0;
+      backdrop-filter: blur(0);
+    }
+  }
+
+  .graph-dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.25rem 0.3rem 0.8rem;
+  }
+
+  .graph-dialog-header span {
+    color: hsl(var(--primary));
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .graph-dialog-header h2 {
+    margin: 0.1rem 0 0;
+    font-size: 1.1rem;
+  }
+
+  .graph-dialog-header button {
+    display: grid;
+    width: 2.2rem;
+    height: 2.2rem;
+    place-items: center;
+    border: 1px solid hsl(var(--border));
+    border-radius: 50%;
+    color: hsl(var(--muted-foreground));
+    background: hsl(var(--muted) / 0.35);
+    cursor: pointer;
+  }
+
+  .graph-dialog-header svg {
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-width: 2;
+  }
+
+  .knowledge-graph {
+    display: grid;
+    grid-template-columns: minmax(13rem, 15rem) minmax(0, 1fr) minmax(13rem, 16rem);
+    gap: 0.8rem;
+    height: calc(100% - 3.8rem);
+  }
+
+  .graph-controls,
+  .graph-workspace,
+  .graph-details {
+    min-width: 0;
+    border: 1px solid hsl(var(--border));
+    border-radius: 1.25rem;
+    background: transparent;
+  }
+
+  .graph-controls,
+  .graph-details {
+    overflow: auto;
+    padding: 1rem;
+  }
+
+  .graph-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  fieldset {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  legend,
+  label > span,
+  .graph-search > span {
+    display: block;
+    margin-bottom: 0.45rem;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.68rem;
+    font-weight: 650;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  input[type='search'],
+  select {
+    width: 100%;
+    padding: 0.58rem 0.65rem;
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.7rem;
+    color: hsl(var(--foreground));
+    background: hsl(var(--muted) / 0.3);
+    font: inherit;
+    font-size: 0.76rem;
+  }
+
+  .graph-search {
+    position: relative;
+  }
+
+  .graph-search > div {
+    position: absolute;
+    top: 100%;
+    z-index: 10;
+    width: 100%;
+    max-height: 15rem;
+    overflow: auto;
+    margin-top: 0.3rem;
+    padding: 0.3rem;
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.7rem;
+    background: hsl(var(--background));
+    box-shadow: 0 12px 30px hsl(var(--foreground) / 0.14);
+  }
+
+  .graph-search :global([data-suggestion]) {
+    display: block;
+    width: 100%;
+    padding: 0.5rem;
+    border: 0;
+    border-radius: 0.45rem;
+    color: hsl(var(--foreground));
+    background: none;
+    cursor: pointer;
+    text-align: left;
+    font-size: 0.72rem;
+  }
+
+  .graph-search :global([data-suggestion]:hover) {
+    background: hsl(var(--muted));
+  }
+
+  .segmented {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.3rem;
+  }
+
+  .segmented button,
+  .graph-actions button {
+    padding: 0.48rem 0.55rem;
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.6rem;
+    color: hsl(var(--muted-foreground));
+    background: hsl(var(--muted) / 0.25);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.7rem;
+  }
+
+  .segmented button.is-active {
+    border-color: hsl(var(--primary) / 0.5);
+    color: hsl(var(--primary));
+    background: hsl(var(--primary) / 0.1);
+  }
+
+  .check-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .check-grid label {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.7rem;
+  }
+
+  .select-grid {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .graph-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem;
+    margin-top: auto;
+  }
+
+  .isolated-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.7rem;
+  }
+
+  .graph-workspace {
+    display: grid;
+    grid-template-rows: auto minmax(32rem, 68vh) auto;
+    overflow: hidden;
+  }
+
+  .graph-workspace > header,
+  .graph-workspace > footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.8rem 1rem;
+  }
+
+  .graph-workspace header strong,
+  .graph-workspace header span {
+    display: block;
+  }
+
+  .graph-workspace header strong {
+    font-size: 0.85rem;
+  }
+
+  .graph-workspace header [data-graph-stats],
+  .graph-workspace footer {
+    color: hsl(var(--muted-foreground));
+    font-size: 0.66rem;
+  }
+
+  .graph-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.55rem;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.62rem;
+  }
+
+  .graph-legend span {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .graph-legend i {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+  }
+
+  .is-blog {
+    background: #8b5cf6;
+  }
+  .is-docs {
+    background: #0ea5e9;
+  }
+  .is-tag {
+    background: #f59e0b;
+  }
+  .is-category {
+    background: #10b981;
+  }
+
+  .graph-canvas {
+    position: relative;
+    min-height: 0;
+    overflow: hidden;
+    border-block: 1px solid hsl(var(--border));
+    background:
+      radial-gradient(circle at 50% 45%, hsl(var(--primary) / 0.08), transparent 46%),
+      linear-gradient(hsl(var(--muted) / 0.14), hsl(var(--background)));
+  }
+
+  .graph-canvas > p {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    margin: 0;
+    place-items: center;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.78rem;
+  }
+
+  .graph-canvas :global(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .graph-details > span {
+    color: hsl(var(--primary));
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .graph-details h2 {
+    margin: 0.45rem 0 0.55rem;
+    font-size: 1rem;
+  }
+
+  .graph-details p,
+  .graph-details :global(li) {
+    color: hsl(var(--muted-foreground));
+    font-size: 0.72rem;
+    line-height: 1.6;
+  }
+
+  .graph-details :global(dl) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.45rem;
+    margin: 1rem 0;
+  }
+
+  .graph-details :global(dl div) {
+    padding: 0.55rem;
+    border-radius: 0.65rem;
+    background: hsl(var(--muted) / 0.35);
+  }
+
+  .graph-details :global(dt) {
+    color: hsl(var(--muted-foreground));
+    font-size: 0.62rem;
+  }
+
+  .graph-details :global(dd) {
+    margin: 0.15rem 0 0;
+    font-size: 0.8rem;
+    font-weight: 650;
+  }
+
+  .graph-details :global(a) {
+    color: hsl(var(--primary));
+    font-size: 0.72rem;
+  }
+
+  @media (max-width: 959px) {
+    .knowledge-graph {
+      grid-template-columns: minmax(12rem, 14rem) minmax(0, 1fr);
+    }
+
+    .graph-details {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 639px) {
+    .knowledge-graph-dialog {
+      width: 100vw;
+      height: 100dvh;
+      padding: 0.55rem;
+      border: 0;
+      border-radius: 0;
+    }
+
+    .knowledge-graph {
+      grid-template-columns: 1fr;
+      height: calc(100% - 3rem);
+      overflow: auto;
+    }
+
+    .graph-workspace {
+      grid-template-rows: auto minmax(27rem, 65vh) auto;
+    }
+
+    .graph-workspace > header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .graph-legend {
+      justify-content: flex-start;
+    }
+  }
+</style>

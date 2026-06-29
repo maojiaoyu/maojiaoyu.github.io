@@ -1,0 +1,56 @@
+---
+import type { ImageMetadata } from 'astro'
+import { Image } from 'astro:assets'
+import BentoCard from '../BentoCard.astro'
+import config from '@/site-config'
+import { Icon } from 'astro-pure/user'
+
+const imagePath = config.logo.src
+const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/*.{jpeg,jpg,png,gif,avif,webp}')
+if (!images[imagePath]) throw new Error(`"${imagePath}" does not exist in glob`)
+---
+
+<BentoCard class="col-span-1 md:col-span-2 row-span-2 flex flex-col justify-between" color="#fb7299">
+  <div class="flex items-start justify-between gap-4">
+    <div class="flex flex-col gap-2">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium w-fit mb-2">
+        <span class="relative flex size-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+          <span class="relative inline-flex rounded-full size-2 bg-primary"></span>
+        </span>
+        Welcome to my dream
+      </div>
+      <h2 class="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+        Hi, I'm <br/><span class="text-primary italic pr-1">{config.author}</span> 👋
+      </h2>
+      <p class="text-muted-foreground max-w-sm mt-2 text-sm leading-relaxed">
+        {config.description || "A creative developer and designer crafting digital experiences."}
+        <br/>既有缘相识，祝你心想事成
+      </p>
+    </div>
+    
+    <div class="relative group shrink-0">
+      <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/40 to-purple-500/40 blur-xl group-hover:blur-2xl transition-all duration-500"></div>
+      <Image
+        src={images[imagePath]()}
+        alt="Profile"
+        class="relative size-20 md:size-24 rounded-full border-2 border-primary/20 shadow-lg object-cover group-hover:-translate-y-1 group-hover:scale-105 transition-all duration-300"
+        width={96}
+        height={96}
+      />
+    </div>
+  </div>
+  
+  <div class="mt-6 flex items-center gap-3">
+    <a href="https://github.com/LemonAdorable" target="_blank" aria-label="GitHub" class="p-2.5 rounded-xl bg-muted/50 hover:bg-primary hover:text-primary-foreground text-muted-foreground transition-colors duration-300">
+      <Icon name="github" class="size-5" />
+    </a>
+    <a href="/about" class="p-2.5 rounded-xl bg-muted/50 hover:bg-primary hover:text-primary-foreground text-muted-foreground transition-colors duration-300">
+      <Icon name="email" class="size-5" />
+    </a>
+    <div class="flex-1"></div>
+    <a href="/about" class="px-5 py-2.5 rounded-xl bg-foreground text-background text-sm font-medium hover:scale-105 transition-transform duration-300 flex items-center gap-2 shadow-md">
+      About Me <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+    </a>
+  </div>
+</BentoCard>

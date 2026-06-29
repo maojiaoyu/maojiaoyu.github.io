@@ -1,0 +1,39 @@
+---
+interface Props {
+  id: string
+  title: string
+  class?: string
+}
+
+const { id, title, class: className } = Astro.props
+---
+
+<section id={id} class:list={['content-page-section', className]}>
+  <header class='content-page-section__header'>
+    <h2>{title}</h2>
+  </header>
+  <div class='content-page-section__body'><slot /></div>
+</section>
+
+<style>
+  .content-page-section {
+    scroll-margin-top: 6rem;
+    padding-block: clamp(2rem, 5vw, 3.25rem);
+    border-top: 1px solid hsl(var(--border));
+  }
+
+  .content-page-section__header {
+    margin-bottom: 1.25rem;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: clamp(1.4rem, 3vw, 1.85rem);
+    font-weight: 620;
+    letter-spacing: -0.025em;
+  }
+
+  .content-page-section__body {
+    min-width: 0;
+  }
+</style>

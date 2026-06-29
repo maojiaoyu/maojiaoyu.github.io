@@ -1,0 +1,396 @@
+---
+title: Astro Theme Pure 使用指南
+publishDate: 2023-07-26 08:00:00
+description: 'Astro Theme Pure 主题的完整使用指南，包括 Markdown 语法、MDX 使用和组件说明'
+tags:
+  - 主题指南
+  - Markdown
+  - MDX
+language: '中文'
+draft: false
+comment: true
+heroImage: { src: './thumbnail.jpg', alt: 'Astro Theme Pure 使用指南' }
+---
+
+import { Aside } from 'astro-pure/user'
+
+## 概述
+
+本文档是 Astro Theme Pure 主题的完整使用指南，涵盖了 Markdown 语法支持、MDX 使用方法以及主题相关的功能说明。
+
+## Markdown 语法支持
+
+Markdown 是一种轻量级且易于使用的语法，用于为您的写作设计风格。
+
+### 基本语法
+
+#### 标题
+
+文章内容较多时，可以用标题分段：
+
+```markdown
+# 标题 1
+
+## 标题 2
+
+## 大标题
+
+### 小标题
+```
+
+#### 粗斜体
+
+```markdown
+_斜体文本_
+
+**粗体文本**
+
+**_粗斜体文本_** 
+```
+
+预览：
+
+_斜体文本_
+
+**粗体文本**
+
+**_粗斜体文本_**
+
+#### 链接
+
+```markdown
+文字链接 [链接名称](http://链接网址)
+```
+
+预览：
+
+文字链接 [链接名称](http://链接网址)
+
+#### 行内代码
+
+```markdown
+这是一条 `单行代码`
+```
+
+预览：
+
+这是一条 `行内代码`
+
+#### 代码块
+
+````markdown
+```js
+// calculate fibonacci
+function fibonacci(n) {
+  if (n <= 1) return 1
+  return fibonacci(n - 1) + fibonacci(n - 2)
+}
+```
+````
+
+预览：
+
+```js
+// calculate fibonacci
+function fibonacci(n) {
+  if (n <= 1) return 1
+  return fibonacci(n - 1) + fibonacci(n - 2)
+}
+```
+
+<Aside type="tip">
+当前使用 shiki 作为代码高亮插件，支持的语言请参考 [Shiki: Languages](https://shiki.matsu.io/languages.html)。
+</Aside>
+
+#### 行内公式
+
+```markdown
+这是一条行内公式 $e^{i\pi} + 1 = 0$
+```
+
+预览：
+
+在Markdown中，行内公式使用单个 `$` 符号包裹，例如：
+
+```math
+e^{i\pi} + 1 = 0
+```
+
+#### 公式块
+
+```markdown
+$$
+\hat{f}(\xi) = \int_{-\infty}^{\infty} f(x) e^{-2\pi i x \xi} \, dx
+$$
+```
+
+预览：
+
+公式块使用双 `$$` 符号包裹：
+
+```math
+\hat{f}(\xi) = \int_{-\infty}^{\infty} f(x) e^{-2\pi i x \xi} \, dx
+```
+
+<Aside type="tip">
+当前使用 KaTeX 作为数学公式插件，支持的语法请参考 [KaTeX Supported Functions](https://katex.org/docs/supported.html)。
+</Aside>
+
+#### 图片
+
+```markdown
+![图片描述](https://gravatar.loli.net/avatar/1ffe42aa45a6b1444a786b1f32dfa8aa?s=200)
+```
+
+预览：
+
+![图片描述](https://gravatar.loli.net/avatar/1ffe42aa45a6b1444a786b1f32dfa8aa?s=200)
+#### 删除线
+
+```markdown
+~~删除线~~
+```
+
+预览：
+
+~~删除线~~
+
+#### 列表
+
+普通无序列表
+
+```markdown
+- 1
+- 2
+- 3
+```
+
+预览：
+
+- 1
+- 2
+- 3
+
+普通有序列表
+
+```markdown
+1. GPT-4
+2. Claude Opus
+3. LLaMa
+```
+
+预览：
+
+1. GPT-4
+2. Claude Opus
+3. LLaMa
+
+列表里可以继续嵌套语法。
+
+#### 引用
+
+```markdown
+> 枪响，雷鸣，剑起。繁花血景。
+```
+
+预览：
+
+> 枪响，雷鸣，剑起。繁花血景。
+
+引用里也可以继续嵌套语法。
+
+#### 换行
+
+Markdown 分段落是需要空一行的。
+
+```markdown
+如果不空行
+就会在一段
+
+第一段
+
+第二段
+```
+
+预览：
+
+如果不空行
+就会在一段
+
+第一段
+
+第二段
+
+#### 分隔符
+
+如果你有写分割线的习惯，可以新起一行输入三个减号`---` 或者星号 `***`。当前后都有段落时，请空出一行：
+
+```markdown
+---
+```
+
+预览：
+
+---
+
+### 高级技巧
+
+#### 行内 HTML 元素
+
+目前只支持部分段内 HTML 元素效果，包括 `<kbd> <b> <i> <em> <sup> <sub> <br>`，如：
+
+##### 键位显示
+
+```markdown
+使用 <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>Del</kbd> 重启电脑
+```
+
+预览：
+
+使用 <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>Del</kbd> 重启电脑
+
+##### 粗斜体
+
+```markdown
+<b> Markdown 在此处同样适用，如 _加粗_ </b>
+```
+
+预览：
+
+<b> Markdown 在此处同样适用，如 _加粗_ </b>
+
+#### 折叠块
+
+```markdown
+<details><summary>点击展开</summary>它被隐藏了</details>
+```
+
+预览：
+
+<details><summary>点击展开</summary>它被隐藏了</details>
+
+#### 表格
+
+```markdown
+| 表头1 | 表头2 |
+| ----- | ----- |
+| 内容1 | 内容2 |
+```
+
+预览：
+
+| 表头1 | 表头2 |
+| ----- | ----- |
+| 内容1 | 内容2 |
+
+#### 注释
+
+```markdown
+在引用的地方使用 [^注释] 来添加注释。
+
+然后在文档的结尾，添加注释的内容（会默认于文章结尾渲染之）。
+
+[^注释]: 这里是注释的内容
+```
+
+预览：
+
+在引用的地方使用 [^注释] 来添加注释。
+
+然后在文档的结尾，添加注释的内容（会默认于文章结尾渲染之）。
+
+[^注释]: 这里是注释的内容
+
+#### To-Do 列表
+
+```markdown
+- [ ] 未完成的任务
+- [x] 已完成的任务
+```
+
+预览：
+
+- [ ] 未完成的任务
+- [x] 已完成的任务
+
+#### 符号转义
+
+如果你的描述中需要用到 markdown 的符号，比如 \_ # \* 等，但又不想它被转义，这时候可以在这些符号前加反斜杠，如 `\_` `\#` `\*` 进行避免。
+
+```markdown
+\_不想这里的文本变斜体\_
+
+\*\*不想这里的文本被加粗\*\*
+```
+
+预览：
+
+\_不想这里的文本变斜体\_
+
+\*\*不想这里的文本被加粗\*\*
+
+## 使用 MDX
+
+### 什么是 MDX？
+
+MDX 是一种特殊的 Markdown 格式，支持嵌入 JavaScript 和 JSX 语法。这使得您可以在 Markdown 内容中[混合 JavaScript 和 UI 组件](https://docs.astro.build/en/guides/markdown-content/#mdx-features)，用于创建交互式图表或提示框等。
+
+<Aside type="tip">
+本主题已安装并配置了 [@astrojs/mdx](https://docs.astro.build/en/guides/integrations-guide/mdx/) 集成。如果您不想使用 MDX，可以从配置文件中移除该集成。
+</Aside>
+
+### 为什么使用 MDX？
+
+如果您已有使用 MDX 编写的内容，这个集成可以让您轻松迁移到 Astro。
+
+### 使用示例
+
+以下是在 MDX 中导入和使用 UI 组件的方法。当您在浏览器中打开此页面时，应该能看到下面可点击的按钮。
+
+```jsx
+import { Button } from 'astro-pure/user'
+
+<Button>Click Me</Button>
+```
+
+### 组件使用
+
+在 MDX 文件中，您可以导入并使用 Astro Theme Pure 提供的各种组件：
+
+```jsx
+import { Aside, Button, Card } from 'astro-pure/user'
+
+<Aside type="tip">
+这是一个提示框示例。
+</Aside>
+
+<Button href="/blog">查看文章</Button>
+```
+
+<Aside type="caution">
+[客户端指令](https://docs.astro.build/en/reference/directives-reference/#client-directives)仍然需要用于创建交互式组件。否则，MDX 中的所有组件将默认渲染为静态 HTML（无 JavaScript）。
+</Aside>
+
+### 更多资源
+
+- [MDX 语法文档](https://mdxjs.com/docs/what-is-mdx)
+- [Astro 使用文档](https://docs.astro.build/en/guides/markdown-content/#markdown-and-mdx-pages)
+
+## 内嵌 Astro 组件
+
+Astro Theme Pure 支持在 Markdown/MDX 中使用各种组件。详细信息请参考：
+
+- [用户组件](/docs/integrations/components) - 包括 Aside、Button、Card 等
+- [高级组件](/docs/integrations/advanced) - 包括更多高级功能
+
+## 总结
+
+Astro Theme Pure 提供了完整的 Markdown 和 MDX 支持，让您可以：
+
+- 使用标准的 Markdown 语法编写内容
+- 通过 MDX 嵌入交互式组件
+- 使用主题提供的各种 UI 组件
+- 支持数学公式、代码高亮等高级功能
+
+开始使用这些功能，让您的内容更加丰富和交互式！
+

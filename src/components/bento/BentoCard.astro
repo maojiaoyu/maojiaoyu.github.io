@@ -1,0 +1,59 @@
+---
+import { cn } from 'astro-pure/utils'
+
+interface Props {
+  class?: string
+  href?: string
+  color?: string // For the colored glow/shadow effect on hover
+}
+
+const { class: className, href, color = 'var(--primary)' } = Astro.props
+const Tag = href ? 'a' : 'div'
+---
+
+<Tag
+  href={href}
+  class={cn(
+    "bento-card group relative overflow-hidden rounded-3xl border border-border/40 bg-background/40 backdrop-blur-md transition-all duration-500",
+    className
+  )}
+  style={`--hover-color: ${color};`}
+>
+  {/* The colored background gradient that fades in on hover (Gensokyo style) */}
+  <div class="bento-bg-glow absolute inset-0 opacity-0 transition-opacity duration-500 z-0"></div>
+  
+  <div class="relative z-10 h-full w-full p-6">
+    <slot />
+  </div>
+</Tag>
+
+<style is:global>
+  /* Gensokyo-style card interactions */
+  .bento-card {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  }
+  
+  .bento-card:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 10px 30px -10px var(--hover-color), 0 0 0 1px rgba(255,255,255,0.1) inset;
+    border-color: transparent;
+  }
+
+  .bento-card .bento-bg-glow {
+    /* Create a subtle colored background on hover */
+    background: linear-gradient(135deg, color-mix(in srgb, var(--hover-color) 15%, transparent), transparent);
+  }
+
+  .bento-card:hover .bento-bg-glow {
+    opacity: 1;
+  }
+
+  /* Specific teal/green hover invert effect seen on cyris.moe for some cards */
+  .bento-card.hover-invert:hover {
+    background: #00d2d3; /* Teal color */
+    color: white !important;
+  }
+  .bento-card.hover-invert:hover * {
+    color: white !important;
+  }
+</style>

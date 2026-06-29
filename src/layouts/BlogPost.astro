@@ -1,0 +1,409 @@
+---
+import type { MarkdownHeading } from 'astro'
+import type { CollectionEntry } from 'astro:content'
+
+// Plugin styles
+import 'katex/dist/katex.min.css'
+
+import config from 'virtual:config'
+
+import { MediumZoom } from 'astro-pure/advanced'
+import { ArticleBottom, Copyright, GraphView, Hero, TOC } from 'astro-pure/components/pages'
+import PageLayout from '@/layouts/ContentLayout.astro'
+import ArticleRail from '@/components/blog/ArticleRail.astro'
+import Backlinks from '@/components/blog/Backlinks.astro'
+import CategoryBreadcrumbs from '@/components/blog/CategoryBreadcrumbs.astro'
+import OutgoingLinks from '@/components/blog/OutgoingLinks.astro'
+import { Giscus } from '@/components/giscus'
+import { PageInfo } from '@/components/waline'
+import type { Backlink } from '@/utils/backlinks'
+import { getPostSlug } from '@/utils/content-paths'
+
+interface Props {
+  post: CollectionEntry<'blog'>
+  posts: CollectionEntry<'blog'>[]
+  headings: MarkdownHeading[]
+  remarkPluginFrontmatter: Record<string, unknown>
+  backlinks?: Backlink[]
+  outgoingLinks?: Backlink[]
+}
+
+const {
+  post: { id, data },
+  posts,
+  headings,
+  remarkPluginFrontmatter,
+  backlinks = [],
+  outgoingLinks = []
+} = Astro.props
+
+const {
+  description,
+  heroImage,
+  publishDate,
+  title,
+  updatedDate,
+  draft: isDraft,
+  comment: enableComment
+} = data
+
+const socialImage = heroImage
+  ? typeof heroImage.src === 'string'
+    ? heroImage.src
+    : heroImage.src.src
+  : config.socialCard
+const articleDate = updatedDate?.toISOString() ?? publishDate.toISOString()
+const primaryColor = data.heroImage?.color ?? '#B19CD9'
+const currentPostSlug = getPostSlug(Astro.props.post)
+---
+
+<PageLayout
+  meta={{ articleDate, description, ogImage: socialImage, title }}
+  highlightColor={primaryColor}
+  back='/blog'
+  mode='article'
+  graphTarget='#blog-graph-view'
+  commentTarget={!isDraft && enableComment && config.integ.giscus?.enable ? '#giscus' : undefined}
+>
+  <Fragment slot='left-sidebar'>
+    <ArticleRail
+      post={Astro.props.post}
+      inboundLinks={backlinks.length}
+      outboundLinks={outgoingLinks.length}
+      readingTime={remarkPluginFrontmatter.minutesRead as string}
+    />
+  </Fragment>
+
+  {!!headings.length && <TOC {headings} slot='sidebar' />}
+
+  <Fragment slot='header'>
+    <CategoryBreadcrumbs post={Astro.props.post} />
+    <Hero {data} {remarkPluginFrontmatter}>
+      <Fragment slot='description'>
+        {!isDraft && enableComment && <PageInfo comment class='mt-1' />}
+      </Fragment>
+    </Hero>
+  </Fragment>
+
+  <slot />
+
+  <div slot='content-after' class='mt-8 flex flex-col gap-3 sm:gap-6 border-t pt-8'>
+    {/* Wikilinks: Outgoing & Backlinks */}
+    {
+      (outgoingLinks.length > 0 || backlinks.length > 0) && (
+        <div id='wikilinks-section' class='wikilinks-container flex flex-col gap-3'>
+          {outgoingLinks.length > 0 && <OutgoingLinks links={outgoingLinks} />}
+          {backlinks.length > 0 && <Backlinks {backlinks} {currentPostSlug} />}
+        </div>
+      )
+    }
+    <GraphView
+      currentSlug={`blog/${currentPostSlug}`}
+      id='blog-graph-view'
+      class='blog-graph-view'
+    />
+    {/* Copyright */}
+    <Copyright {data} />
+    {/* Article recommend */}
+    <ArticleBottom collections={posts} {id} />
+  </div>
+
+  <Fragment slot='bottom'>
+    {/* Comment */}
+    {!isDraft && enableComment && config.integ.giscus?.enable && <Giscus class='mt-3 sm:mt-6' />}
+  </Fragment>
+</PageLayout>
+
+{config.integ.mediumZoom.enable && <MediumZoom />}
+
+<script>
+  import('@/components/scripts/wikilink-preview.ts').catch((err) => {
+    console.error('Failed to load wikilink preview:', err)
+  })
+</script>
+
+<script>
+  /**
+   * Enhanced anchor navigation: scroll-to-center + highlight animation
+   */
+  function scrollToAndHighlight(target: Element, highlightClass = 'anchor-highlight') {
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' })
+
+    // Reset animation
+    target.classList.remove(highlightClass)
+    void (target as HTMLElement).offsetWidth // Force reflow
+    target.classList.add(highlightClass)
+
+    setTimeout(() => target.classList.remove(highlightClass), 2400)
+  }
+
+  function initBlogNavigation() {
+    // 1. Footnotes
+    document.querySelectorAll('a[data-footnote-ref], a.data-footnote-backref').forEach((link) => {
+      link.addEventListener('click', (e) => {
+        const href = (link as HTMLAnchorElement).getAttribute('href')
+        if (!href?.startsWith('#')) return
+        const target = document.getElementById(href.slice(1))
+        if (target) {
+          e.preventDefault()
+          scrollToAndHighlight(target)
+        }
+      })
+    })
+
+    // 2. Wikilink numbered locators
+    const wikilinks = document.querySelectorAll('a.wikilink')
+    const indexMap = new Map<string, number>()
+    let currentIndex = 1
+
+    wikilinks.forEach((link) => {
+      const href = link.getAttribute('href') || ''
+      const match = href.match(/\/blog\/([^/]+)/)
+      if (match && !indexMap.has(match[1])) indexMap.set(match[1], currentIndex++)
+    })
+
+    wikilinks.forEach((link) => {
+      if (link.nextElementSibling?.classList.contains('wikilink-locate-btn')) return
+      const href = link.getAttribute('href') || ''
+      const match = href.match(/\/blog\/([^/]+)/)
+      const index = match ? indexMap.get(match[1]) : null
+      if (!index) return
+
+      const btn = document.createElement('button')
+      btn.className = 'wikilink-locate-btn'
+      btn.title = '定位到相关链接'
+      btn.innerHTML = `<span class="btn-number">${index}</span><span class="btn-arrow">↓</span>`
+      btn.addEventListener('click', (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+
+        const section = document.getElementById('wikilinks-section')
+        if (section) {
+          section.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          setTimeout(() => {
+            const row = section.querySelector(`.links-row[data-index="${index}"]`) as HTMLElement
+            if (row) {
+              row.classList.remove('links-row-highlight')
+              void row.offsetWidth
+              row.classList.add('links-row-highlight')
+              setTimeout(() => row.classList.remove('links-row-highlight'), 2000)
+            }
+          }, 500)
+        }
+      })
+      link.parentNode?.insertBefore(btn, link.nextSibling)
+    })
+
+    // 3. Indexing for link rows
+    document
+      .querySelector('.outgoing-links-section')
+      ?.querySelectorAll('.links-row')
+      .forEach((row) => {
+        if (row.querySelector('.links-index')) return
+        const href = row.querySelector('a.links-link')?.getAttribute('href') || ''
+        const match = href.match(/\/blog\/([^/]+)/)
+        const index = match ? indexMap.get(match[1]) : null
+        if (index) {
+          row.setAttribute('data-index', String(index))
+          const badge = document.createElement('span')
+          badge.className = 'links-index'
+          badge.textContent = String(index)
+          row.insertBefore(badge, row.firstChild)
+        }
+      })
+
+    // 4. URL locate parameter
+    const locateTarget = new URLSearchParams(window.location.search).get('locate')
+    if (locateTarget) {
+      setTimeout(() => {
+        // locateTarget may be a full slug like 'flash/redminote5nethunter'
+        // but wikilink hrefs may be just '/blog/redminote5nethunter' (no subdirectory)
+        // So compare the last path segment of both for matching
+        const locateFilename = locateTarget.split('/').filter(Boolean).at(-1)
+        const target = Array.from(document.querySelectorAll('a.wikilink')).find((link) => {
+          const href = link.getAttribute('href') || ''
+          const hrefFilename = href.split('/').filter(Boolean).at(-1)
+          return hrefFilename === locateFilename
+        })
+        if (target) {
+          scrollToAndHighlight(target, 'wikilink-highlight')
+          window.history.replaceState({}, '', window.location.pathname + window.location.hash)
+        }
+      }, 500)
+    }
+  }
+
+  function setupRelatedNavigation() {
+    if (document.documentElement.dataset.relatedNavigationReady === 'true') return
+    document.documentElement.dataset.relatedNavigationReady = 'true'
+
+    document.addEventListener('click', (event) => {
+      const trigger = (event.target as Element | null)?.closest<HTMLAnchorElement>(
+        '[data-related-jump]'
+      )
+      if (!trigger) return
+
+      const href = trigger.getAttribute('href')
+      const target = href?.startsWith('#') ? document.querySelector(href) : null
+      if (!target) return
+
+      event.preventDefault()
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' })
+
+      if (href === '#wikilinks-section') {
+        target.querySelectorAll('.links-header').forEach((header) => {
+          header.classList.remove('links-header-highlight')
+          void (header as HTMLElement).offsetWidth
+          header.classList.add('links-header-highlight')
+          setTimeout(() => header.classList.remove('links-header-highlight'), 2000)
+        })
+      } else if (href === '#blog-graph-view') {
+        target.classList.remove('graph-view-locate-highlight')
+        void (target as HTMLElement).offsetWidth
+        target.classList.add('graph-view-locate-highlight')
+        setTimeout(() => target.classList.remove('graph-view-locate-highlight'), 2200)
+      }
+    })
+  }
+
+  setupRelatedNavigation()
+  initBlogNavigation()
+  document.addEventListener('astro:page-load', initBlogNavigation)
+</script>
+
+<style>
+  .blog-graph-view {
+    margin-top: 0;
+  }
+</style>
+
+<style is:global>
+  .wikilink-locate-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.125rem;
+    height: 1.125rem;
+    margin-left: 0.2rem;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: hsl(var(--primary) / 0.15);
+    color: hsl(var(--primary));
+    font-size: 0.625rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    vertical-align: middle;
+    overflow: hidden;
+  }
+  .wikilink-locate-btn .btn-number,
+  .wikilink-locate-btn .btn-arrow {
+    position: absolute;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .wikilink-locate-btn .btn-number {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .wikilink-locate-btn .btn-arrow {
+    opacity: 0;
+    transform: translateY(-8px);
+    font-size: 0.75rem;
+  }
+  .wikilink-locate-btn:hover {
+    background-color: hsl(var(--primary) / 0.9);
+    color: hsl(var(--background));
+    transform: scale(1.15);
+    box-shadow: 0 2px 8px hsl(var(--primary) / 0.3);
+  }
+  .wikilink-locate-btn:hover .btn-number {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  .wikilink-locate-btn:hover .btn-arrow {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .links-index {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: 0.25rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: hsl(var(--primary));
+    background: hsl(var(--primary) / 0.12);
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+  .links-row:hover .links-index {
+    background: hsl(var(--primary) / 0.9);
+    color: hsl(var(--background));
+  }
+
+  /* Animation for specific rows */
+  .links-row-highlight {
+    animation: row-pulse 0.5s ease-in-out 3;
+  }
+  .links-row-highlight .links-index {
+    animation: index-pulse 0.5s ease-in-out 3;
+  }
+
+  /* Subtle animation for headers when triggered from sidebar */
+  .links-header-highlight {
+    animation: row-pulse 0.6s ease-in-out 3;
+    padding: 2px 8px;
+    margin-left: -8px;
+    border-radius: 6px;
+  }
+
+  @keyframes row-pulse {
+    0%,
+    100% {
+      background-color: transparent;
+    }
+    50% {
+      background-color: hsl(var(--primary) / 0.12);
+    }
+  }
+  @keyframes index-pulse {
+    0%,
+    100% {
+      background: hsl(var(--primary) / 0.12);
+      color: hsl(var(--primary));
+    }
+    50% {
+      background: hsl(var(--primary) / 0.9);
+      color: hsl(var(--background));
+    }
+  }
+
+  .graph-view-locate-highlight .graph-canvas {
+    animation: graph-view-locate 720ms ease-in-out 3;
+  }
+
+  @keyframes graph-view-locate {
+    0%,
+    100% {
+      border-color: hsl(var(--border) / 0.6);
+      box-shadow: 0 0 0 0 hsl(var(--primary) / 0);
+    }
+    50% {
+      border-color: hsl(var(--primary) / 0.72);
+      box-shadow: 0 0 0 0.28rem hsl(var(--primary) / 0.1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .graph-view-locate-highlight .graph-canvas {
+      animation: none;
+      border-color: hsl(var(--primary) / 0.72);
+    }
+  }
+</style>

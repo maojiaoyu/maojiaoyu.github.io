@@ -1,0 +1,177 @@
+---
+import { render, type CollectionEntry } from 'astro:content'
+
+import { MediumZoom } from 'astro-pure/advanced'
+import { GraphView, TOC } from 'astro-pure/components/pages'
+import { getBlogCollection, sortMDByDate } from 'astro-pure/server'
+import PageLayout from '@/layouts/ContentLayout.astro'
+import Backlinks from '@/components/blog/Backlinks.astro'
+import OutgoingLinks from '@/components/blog/OutgoingLinks.astro'
+import HelpSupport from '@/components/docs/HelpSupport.astro'
+import {
+  buildBacklinksMap,
+  getBacklinksForPost,
+  getOutgoingLinks,
+  type Backlink
+} from '@/utils/backlinks'
+
+import DocsContents from './DocsContents.astro'
+
+export const prerender = true
+
+export async function getStaticPaths() {
+  const posts = sortMDByDate(await getBlogCollection('docs'))
+  const backlinksMap = await buildBacklinksMap(posts, '/docs')
+
+  return posts.map((post) => ({
+    params: { id: post.id },
+    props: {
+      post,
+      backlinks: getBacklinksForPost(backlinksMap, post.id),
+      outgoingLinks: getOutgoingLinks(post, posts, '/docs')
+    }
+  }))
+}
+
+type Props = {
+  post: CollectionEntry<'docs'>
+  backlinks: Backlink[]
+  outgoingLinks: Backlink[]
+}
+
+const { post, backlinks, outgoingLinks } = Astro.props
+const { Content, headings } = await render(post)
+const { description, title } = post.data
+
+const editPath = `https://github.com/cworld1/astro-theme-pure/edit/main/${post.filePath}`
+---
+
+<PageLayout meta={{ description, title }} back='/docs' graphTarget='#docs-graph-view' mode='article'>
+  <Fragment slot='left-sidebar'>
+    <DocsContents class='docs-toc block mt-3' />
+  </Fragment>
+  
+  <Fragment slot='sidebar'>
+    {!!headings.length && <TOC {headings} />}
+  </Fragment>
+
+  <Fragment slot='header'>
+    <div class='mb-8 rounded-2xl bg-muted/30 px-6 py-5 shadow-sm'>
+      <h1 class='text-3xl font-bold tracking-tight text-foreground sm:text-4xl'>
+        {title}
+      </h1>
+      {
+        description && (
+          <div class='mt-3 text-sm leading-6 text-muted-foreground'>
+            <p class='italic text-foreground/80'>{description}</p>
+          </div>
+        )
+      }
+    </div>
+  </Fragment>
+
+  <Content />
+
+  <div slot='content-after' class='mt-8 flex flex-col gap-3 border-t pt-8 sm:gap-6'>
+    {
+      (outgoingLinks.length > 0 || backlinks.length > 0) && (
+        <div id='wikilinks-section' class='flex flex-col gap-3'>
+          {outgoingLinks.length > 0 && <OutgoingLinks links={outgoingLinks} />}
+          {backlinks.length > 0 && (
+            <Backlinks {backlinks} currentPostSlug={post.id} title='引用此文档' />
+          )}
+        </div>
+      )
+    }
+    <GraphView currentSlug={`docs/${post.id}`} id='docs-graph-view' />
+  </div>
+
+  <div slot='bottom'>
+    <HelpSupport editPath={editPath} />
+
+    {/* Show docs contents grid */}
+    <div class='mt-10'>
+      <h3 class='text-xl font-bold text-foreground tracking-tight mb-2'>探索更多</h3>
+      <p class='text-sm text-muted-foreground mb-6'>发现知识库中的更多指南与资源</p>
+      <DocsContents layout='grid' class='!mt-0' />
+    </div>
+  </div>
+</PageLayout>
+<MediumZoom />
+
+<script>
+  import('@/components/scripts/wikilink-preview.ts').catch((error) => {
+    console.error('Failed to load wikilink preview:', error)
+  })
+
+  function highlightTarget(target: Element, highlightClass = 'anchor-highlight') {
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    target.classList.remove(highlightClass)
+    void (target as HTMLElement).offsetWidth
+    target.classList.add(highlightClass)
+    setTimeout(() => target.classList.remove(highlightClass), 2400)
+  }
+
+  function getHashTarget(hash: string) {
+    if (!hash.startsWith('#') || hash.length === 1) return null
+    try {
+      return document.getElementById(decodeURIComponent(hash.slice(1)))
+    } catch {
+      return null
+    }
+  }
+
+  function highlightCurrentHash() {
+    const target = getHashTarget(window.location.hash)
+    if (target) highlightTarget(target)
+  }
+
+  function initDocsNavigation() {
+    document.querySelectorAll('a[data-footnote-ref], a.data-footnote-backref').forEach((link) => {
+      if (link.hasAttribute('data-docs-navigation-ready')) return
+      link.setAttribute('data-docs-navigation-ready', 'true')
+      link.addEventListener('click', (event) => {
+        const href = link.getAttribute('href')
+        if (!href?.startsWith('#')) return
+        const target = document.getElementById(href.slice(1))
+        if (!target) return
+        event.preventDefault()
+        highlightTarget(target)
+      })
+    })
+
+    document.querySelectorAll<HTMLAnchorElement>('#content a[href^="#"]').forEach((link) => {
+      if (link.hasAttribute('data-docs-hash-ready')) return
+      link.setAttribute('data-docs-hash-ready', 'true')
+      link.addEventListener('click', (event) => {
+        const target = getHashTarget(link.hash)
+        if (!target) return
+        event.preventDefault()
+        history.pushState(null, '', link.hash)
+        highlightTarget(target)
+      })
+    })
+
+    const locateTarget = new URLSearchParams(window.location.search).get('locate')
+    if (!locateTarget) {
+      if (window.location.hash) requestAnimationFrame(highlightCurrentHash)
+      return
+    }
+
+    setTimeout(() => {
+      const target = Array.from(document.querySelectorAll('#content a[href]')).find((link) => {
+        const href = link.getAttribute('href')?.split('#', 1)[0] ?? ''
+        const documentId = href.replace(/^\/docs\//, '').replace(/\/$/, '')
+        return documentId === locateTarget || documentId.split('/').at(-1) === locateTarget
+      })
+      if (target) {
+        highlightTarget(target, 'wikilink-highlight')
+        window.history.replaceState({}, '', window.location.pathname + window.location.hash)
+      }
+    }, 500)
+  }
+
+  initDocsNavigation()
+  document.addEventListener('astro:page-load', initDocsNavigation)
+  window.addEventListener('hashchange', highlightCurrentHash)
+</script>

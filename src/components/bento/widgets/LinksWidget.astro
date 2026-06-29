@@ -1,0 +1,17 @@
+---
+import BentoCard from '../BentoCard.astro'
+import { Icon } from 'astro-pure/user'
+---
+
+<BentoCard class="col-span-1 row-span-1 flex flex-col justify-between group" href="/projects" color="#eab308">
+  <div class="flex justify-between items-start">
+    <div class="w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center text-yellow-500 group-hover:bg-yellow-500 group-hover:text-white transition-colors duration-300">
+      <Icon name="link" class="size-5" />
+    </div>
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground/30 group-hover:text-yellow-500 group-hover:-translate-y-1 group-hover:translate-x-1 transition-all"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg>
+  </div>
+  <div class="mt-4">
+    <h3 class="text-lg font-bold">More Projects</h3>
+    <p class="text-xs text-muted-foreground mt-1">View my portfolio</p>
+  </div>
+</BentoCard>

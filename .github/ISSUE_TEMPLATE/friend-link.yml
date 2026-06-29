@@ -1,0 +1,62 @@
+name: 申请友链 / Friend link request
+description: 自动校验回链并申请加入 Iris 友链 / Validate the backlink and apply to join Iris
+title: '[友链申请 / Friend link] '
+labels:
+  - friend-link
+body:
+  - type: markdown
+    attributes:
+      value: |
+        提交前请先在你的友链页面添加本站。提交后机器人会检查页面和回链，通过后自动写入友链列表。
+        Please add this site to your friend-links page before submitting. The bot will validate the page and backlink before adding your site.
+
+  - type: input
+    id: site-name
+    attributes:
+      label: 网站名称 / Site name
+      placeholder: 灵的梦境
+    validations:
+      required: true
+
+  - type: input
+    id: site-url
+    attributes:
+      label: 网站链接 / Site URL
+      description: 网站首页地址，必须使用 http 或 https。 The homepage URL must use HTTP or HTTPS.
+      placeholder: https://example.com/
+    validations:
+      required: true
+
+  - type: input
+    id: friend-page-url
+    attributes:
+      label: 友链页面 URL / Friend-links page URL
+      description: 机器人将在此页面检查本站回链。 The bot will check this page for a backlink.
+      placeholder: https://example.com/links/
+    validations:
+      required: true
+
+  - type: input
+    id: site-description
+    attributes:
+      label: 网站描述 / Site description
+      placeholder: 一句话介绍你的网站 / A short introduction to your site
+    validations:
+      required: true
+
+  - type: input
+    id: site-avatar
+    attributes:
+      label: 网站头像 URL / Site avatar URL
+      description: 建议使用正方形图片，并确保允许外链访问。 Use a square image that allows hotlinking.
+      placeholder: https://example.com/avatar.png
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 提交确认 / Confirmation
+      options:
+        - label: 我已在友链页面添加本站，并确认以上地址可以公开访问。 I have added this site and confirmed that all URLs are publicly accessible.
+          required: true

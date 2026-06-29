@@ -1,0 +1,127 @@
+---
+title: 树莓派无屏安装PINN
+publishDate: "2025-02-05 22:19:29"
+description: 树莓派无屏幕环境下安装和配置PINN多系统启动器的详细教程
+tags:
+  - Flash
+  - Boot
+  - Raspberry Pi
+draft: false
+comment: true
+language: 中文
+---
+
+import { Aside } from 'astro-pure/user'
+
+## 概述
+
+PINN（PINN is Not NOOBS）是一个用于树莓派的多系统启动器，允许你在同一张SD卡上安装和运行多个操作系统。本教程将介绍如何在无屏幕环境下安装和配置PINN。
+
+## 前置准备
+
+- 树莓派设备
+- SD卡（建议16GB以上）
+- 网线（用于连接网络）
+- 电脑（用于配置和访问）
+
+## 安装步骤
+
+### 1. 刷入PINN
+
+1. 下载PINN镜像文件
+2. 使用工具（如Raspberry Pi Imager或balenaEtcher）将镜像刷入SD卡
+3. 将SD卡插入树莓派
+
+### 2. 网络配置
+
+<Aside type="tip">
+如果树莓派无法自动连接网络，可以通过以下方式检查网络连接。
+</Aside>
+
+刷入PINN后，连接网线并重启树莓派。如果无法连接网络，可以通过以下命令查看局域网中的所有设备：
+
+```bash
+arp -a
+```
+
+### 3. 配置VNC访问
+
+在SD卡根目录下创建 `recovery.cmdline` 配置文件（注意：在某些版本中，`recovery.cmdline` 可能被 `cmdline.txt` 替代）。
+
+<Aside type="caution">
+如果遇到网络连接问题，可能是GitHub仓库更新无法访问导致的。可以将命令直接放在配置文件开头，但后续需要使用这个连接来加载系统列表。
+</Aside>
+
+在配置文件中添加以下内容：
+
+```plaintext
+vncinstall forcetrigger
+```
+
+<Aside type="tip">
+其他可能用到的参数包括 `vncshare` 和 `ssh`，可以根据需要添加。
+</Aside>
+
+### 4. VNC登录
+
+- **默认账户**：无（直接回车）
+- **默认密码**：无（直接回车）
+- **默认端口**：5900
+
+### 5. 安装系统
+
+1. 通过VNC连接到树莓派
+2. 在PINN界面中选择要安装的系统
+3. 建议先安装一个较小的系统（如OpenWrt），并为其分配额外的1GB空间
+
+### 6. 配置OpenWrt
+
+安装OpenWrt后：
+
+1. 移除 `forcetrigger` 配置
+2. 使用网线将树莓派连接到电脑
+3. 重启树莓派
+4. OpenWrt默认账户密码：
+   - **用户名**：`root`
+   - **密码**：`password`
+5. 在Network选项卡中启用OpenWrt的无线功能
+6. 将树莓派连接到光猫，电脑连接到OpenWrt的WiFi
+
+## 配置示例
+
+### recovery.cmdline 配置
+
+```plaintext
+vncinstall forcetrigger
+```
+
+## 待探索功能
+
+- PINN自动安装功能
+- 如何在启动后的系统中无缝使用VNC
+- 如何在物理机上切换树莓派上的系统
+
+## 常见问题
+
+### 网络连接问题
+
+如果无法连接网络，检查：
+
+1. 网线连接是否正常
+2. 网络配置是否正确
+3. GitHub仓库是否可以访问
+
+### VNC连接问题
+
+- 确保防火墙允许VNC端口（5900）
+- 检查树莓派IP地址是否正确
+- 尝试使用不同的VNC客户端
+
+## 参考资源
+
+- [headless setup, impossible: recovery.cmdline not found at all, autoboot.txt not working · Issue #843 · procount/pinn](https://github.com/procount/pinn/issues/843)
+
+## 总结
+
+通过以上步骤，你可以在无屏幕环境下成功安装和配置PINN多系统启动器。记住在配置过程中保持网络连接，以便下载和安装系统镜像。
+

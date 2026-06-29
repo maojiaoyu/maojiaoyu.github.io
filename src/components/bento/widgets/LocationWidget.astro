@@ -1,0 +1,20 @@
+---
+import BentoCard from '../BentoCard.astro'
+---
+
+<BentoCard class="col-span-1 row-span-1 flex flex-col justify-between" color="#3b82f6">
+  <div class="flex items-center justify-between mb-2">
+    <h3 class="text-sm font-medium text-muted-foreground">Base</h3>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground/50"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon><line x1="9" x2="9" y1="3" y2="18"></line><line x1="15" x2="15" y1="6" y2="21"></line></svg>
+  </div>
+  <div class="flex-1 flex flex-col justify-end">
+    <div class="text-2xl font-bold flex items-center gap-2 tracking-tight">
+      <span class="relative flex size-3">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full size-3 bg-blue-500"></span>
+      </span>
+      China
+    </div>
+    <p class="text-sm text-muted-foreground mt-1">GMT+8</p>
+  </div>
+</BentoCard>

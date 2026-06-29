@@ -1,0 +1,19 @@
+---
+import { cn } from 'astro-pure/utils'
+
+interface Props {
+  class?: string
+}
+
+const { class: className } = Astro.props
+---
+
+<div class={cn("bento-grid grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full auto-rows-[140px]", className)}>
+  <slot />
+</div>
+
+<style is:global>
+  .bento-grid {
+    grid-auto-flow: dense;
+  }
+</style>

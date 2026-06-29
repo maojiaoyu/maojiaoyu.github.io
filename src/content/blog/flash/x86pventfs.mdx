@@ -1,0 +1,152 @@
+---
+title: X86装PVE虚拟机挂载NTFS文件系统
+publishDate: "2025-01-12 22:29:34"
+description: 在X86平台上安装PVE虚拟机并挂载NTFS文件系统的完整教程
+tags:
+  - Flash
+  - VM
+  - PVE
+  - NTFS
+draft: false
+comment: true
+language: 中文
+---
+
+import { Aside } from 'astro-pure/user'
+
+## 概述
+
+本教程将介绍如何在X86平台上安装Proxmox VE（PVE）虚拟机，并配置挂载NTFS文件系统。
+
+## 安装准备
+
+### 升级Ventoy版本
+
+首先升级Ventoy到最新版本，以确保兼容性。
+
+### BIOS设置
+
+1. **关闭安全快速启动**
+2. **切换为其他系统模式**
+3. **开启虚拟化VT**
+
+<Aside type="tip">
+这些设置对于PVE的正常运行至关重要，务必在安装前完成配置。
+</Aside>
+
+## 安装PVE
+
+### 安装注意事项
+
+<Aside type="caution">
+安装PVE时建议断网安装，后面配置很麻烦。如果联网安装，可能会自动配置一些不需要的设置。
+</Aside>
+
+### 默认账户
+
+- **用户名**：`root`
+- **密码**：安装时设置
+
+## 安装iStoreOS
+
+### 导入磁盘
+
+参考教程：
+- [PVE下三软路由之第二个旁路由iStoreOS安装（五） - 知乎](https://zhuanlan.zhihu.com/p/693976462)
+- [iStoreOS 固件 | 易有云产品中心](https://doc.linkease.com/zh/guide/istoreos/)
+
+### 导入命令
+
+```shell
+qm importdisk 100 /var/lib/vz/template/iso/istoreos-22.03.7-2024122712-x86-64-squashfs-combined-efi.img local-lvm
+```
+
+<Aside type="tip">
+记不得上传地址可以在任务日志中找复制数据。
+</Aside>
+
+## 安装Windows 10
+
+### VirtIO驱动
+
+装Win10需要装VirtIO驱动包，硬盘驱动选amd64下的，x86的装不了。
+
+<Aside type="note">
+可能这里不是我理解的意思，后面再看看。但实际测试中，使用amd64版本的驱动可以正常工作。
+</Aside>
+
+## Alpine运行Docker
+
+### 默认账户
+
+- **账号**：`root`
+- **密码**：LXC的密码
+
+参考资源：
+- [pve 用lxc容器运行docker最小化部署，以及lxc所有问题汇总！](https://dev.leiyanhui.com/pve/docker-mini/)
+
+## 挂载NTFS文件系统
+
+### 问题描述
+
+NTFS挂载为只读，无法进行读写操作。
+
+### 解决方案
+
+使用`ntfs3`挂载即可进行读写。
+
+### 挂载失败问题
+
+**问题**：挂载失败。
+
+**解决方案**：安装`ntfs-3g`，其中包含`ntfsfix`。
+
+参考资源：
+- [[已解决]通过 ntfs3 挂载 ntfs 分区失败 / 新手园地 / Arch Linux 论坛](https://bbs.archlinux.org/viewtopic.php?id=271650)
+
+### 修复和挂载命令
+
+<Aside type="note">
+Check your dmesg for errors with ntfs3. Chances are the volume is still marked dirty, and ntfs3 will not mount a partition where that is the case without the force option. ntfsfix without any arguments will actively set the dirty bit, so that a chkdsk from Windows can do a real check/analysis. If you don't have that handy and want to clear the dirty bit despite ntfsfix not being entirely a good checking tool you can pass the -d argument to ntfsfix.
+
+Thanks! You are right! Just need to enter the follow comands:
+</Aside>
+
+```shell
+sudo ntfsfix -d /dev/sdb1
+sudo mount -t ntfs3 /dev/sdb1 /mnt/Data
+```
+
+## 存储配置
+
+### 添加目录
+
+在存储中添加目录，内容选所有。
+
+### 共享目录
+
+可以共享目录，也可以在Win虚拟机添加磁盘。
+
+## 端口映射
+
+### DMZ配置
+
+端口映射，光猫处给虚拟机开DMZ就行。
+
+<Aside type="caution">
+开启DMZ会将所有端口转发到虚拟机，存在安全风险。建议只开放必要的端口。
+</Aside>
+
+## 总结
+
+在X86平台上安装PVE并挂载NTFS文件系统的步骤：
+
+1. 升级Ventoy并配置BIOS
+2. 断网安装PVE
+3. 导入iStoreOS或其他系统
+4. 安装VirtIO驱动（Windows系统）
+5. 使用ntfs3挂载NTFS文件系统
+6. 配置存储和端口映射
+
+整个过程需要注意BIOS设置、驱动选择和文件系统挂载方式。
+

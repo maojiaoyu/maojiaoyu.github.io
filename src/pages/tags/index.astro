@@ -1,0 +1,401 @@
+---
+import { getBlogCollection, getUniqueTagsWithCount } from 'astro-pure/server'
+import { Icon } from 'astro-pure/user'
+import PageLayout from '@/layouts/BaseLayout.astro'
+import KnowledgeIndexHero from '@/components/KnowledgeIndexHero.astro'
+import GlobalTagGraph from '@/components/tags/GlobalTagGraph.astro'
+
+const allPosts = await getBlogCollection()
+const allTags = getUniqueTagsWithCount(allPosts).sort(
+  ([tagA, countA], [tagB, countB]) =>
+    countB - countA || tagA.localeCompare(tagB, undefined, { sensitivity: 'base' })
+)
+const totalTagUses = allTags.reduce((total, [, count]) => total + count, 0)
+const maxTagCount = Math.max(...allTags.map(([, count]) => count), 1)
+const tagLinkCounts = new Map<string, number>()
+
+allPosts.forEach((post) => {
+  const tags = [...new Set(post.data.tags)].sort()
+
+  for (let sourceIndex = 0; sourceIndex < tags.length; sourceIndex += 1) {
+    for (let targetIndex = sourceIndex + 1; targetIndex < tags.length; targetIndex += 1) {
+      const key = JSON.stringify([tags[sourceIndex], tags[targetIndex]])
+      tagLinkCounts.set(key, (tagLinkCounts.get(key) ?? 0) + 1)
+    }
+  }
+})
+
+const graphNodes = allTags.map(([name, count]) => ({ name, count }))
+const graphLinks = [...tagLinkCounts.entries()].map(([key, count]) => {
+  const [source, target] = JSON.parse(key) as [string, string]
+  return { source, target, count }
+})
+
+const meta = {
+  description: "Browse all the topics I've written about",
+  title: 'Tags'
+}
+---
+
+<PageLayout {meta}>
+  <main class='tags-page mt-6 lg:mt-10'>
+    <KnowledgeIndexHero
+      icon='hashtag'
+      eyebrow='Topic index'
+      title='标签'
+      description='沿着主题浏览文章，并发现跨目录重复出现的概念与联系。'
+      stats={[
+        { label: '标签', value: allTags.length },
+        { label: '文章', value: allPosts.length },
+        { label: '标签引用', value: totalTagUses }
+      ]}
+      statsLabel='标签统计'
+      symbol='#'
+    />
+
+    <GlobalTagGraph nodes={graphNodes} links={graphLinks} />
+
+    <section id='content' class='tag-browser animate' aria-labelledby='tag-browser-title'>
+      {
+        allTags.length > 0 ? (
+          <>
+            <div class='tag-toolbar'>
+              <div>
+                <h2 id='tag-browser-title'>Explore topics</h2>
+                <p>
+                  <span data-visible-count>{allTags.length}</span> tags, ordered by activity
+                </p>
+              </div>
+
+              <label class='tag-search'>
+                <Icon name='search' class='size-5' />
+                <span class='sr-only'>Search tags</span>
+                <input
+                  type='search'
+                  placeholder='Search tags...'
+                  autocomplete='off'
+                  data-tag-search
+                />
+                <kbd>/</kbd>
+              </label>
+            </div>
+
+            <ul class='tag-grid' data-tag-grid>
+              {allTags.map(([tag, count], index) => (
+                <li data-tag-item data-tag-name={tag.toLocaleLowerCase()}>
+                  <a
+                    class='tag-card'
+                    href={`/tags/${encodeURIComponent(tag)}`}
+                    data-astro-prefetch
+                    style={`--tag-strength:${Math.max(count / maxTagCount, 0.08)}`}
+                    aria-label={`${tag}, ${count} ${count === 1 ? 'post' : 'posts'}`}
+                  >
+                    <span class='tag-card__index'>{String(index + 1).padStart(2, '0')}</span>
+                    <span class='tag-card__main'>
+                      <span class='tag-card__name'>
+                        <span aria-hidden='true'>#</span>
+                        {tag}
+                      </span>
+                      <span class='tag-card__meta'>
+                        {count} {count === 1 ? 'post' : 'posts'}
+                      </span>
+                    </span>
+                    <span class='tag-card__arrow' aria-hidden='true'>
+                      ↗
+                    </span>
+                    <span class='tag-card__meter' aria-hidden='true'>
+                      <span />
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+
+            <div class='tag-empty' data-tag-empty hidden>
+              <span class='tag-empty__icon'>#</span>
+              <strong>No matching tags</strong>
+              <p>Try another keyword.</p>
+            </div>
+          </>
+        ) : (
+          <div class='tag-empty'>
+            <span class='tag-empty__icon'>#</span>
+            <strong>No tags yet</strong>
+            <p>Published posts with tags will appear here.</p>
+          </div>
+        )
+      }
+    </section>
+  </main>
+
+  <script>
+    const setupTagSearch = () => {
+      const input = document.querySelector<HTMLInputElement>('[data-tag-search]')
+      const items = [...document.querySelectorAll<HTMLElement>('[data-tag-item]')]
+      const empty = document.querySelector<HTMLElement>('[data-tag-empty]')
+      const visibleCount = document.querySelector<HTMLElement>('[data-visible-count]')
+
+      if (!input || items.length === 0) return
+
+      const filterTags = () => {
+        const query = input.value.trim().toLocaleLowerCase()
+        let matches = 0
+
+        items.forEach((item) => {
+          const isMatch = item.dataset.tagName?.includes(query) ?? false
+          item.hidden = !isMatch
+          if (isMatch) matches += 1
+        })
+
+        if (visibleCount) visibleCount.textContent = String(matches)
+        if (empty) empty.hidden = matches !== 0
+      }
+
+      input.oninput = filterTags
+    }
+
+    const focusTagSearch = (event: KeyboardEvent) => {
+      const activeElement = document.activeElement
+      const input = document.querySelector<HTMLInputElement>('[data-tag-search]')
+
+      if (
+        event.key === '/' &&
+        input &&
+        activeElement?.tagName !== 'INPUT' &&
+        activeElement?.tagName !== 'TEXTAREA' &&
+        !(activeElement instanceof HTMLElement && activeElement.isContentEditable)
+      ) {
+        event.preventDefault()
+        input.focus()
+      }
+    }
+
+    setupTagSearch()
+    document.addEventListener('astro:page-load', setupTagSearch)
+    document.addEventListener('keydown', focusTagSearch)
+  </script>
+
+  <style>
+    .tag-browser {
+      margin-top: 2.75rem;
+    }
+
+    .tag-toolbar {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .tag-toolbar h2 {
+      margin: 0;
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+
+    .tag-toolbar p {
+      margin: 0.25rem 0 0;
+      color: hsl(var(--muted-foreground));
+      font-size: 0.8rem;
+    }
+
+    .tag-search {
+      display: flex;
+      width: min(100%, 18rem);
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.65rem 0.75rem;
+      border: 1px solid hsl(var(--border));
+      border-radius: 0.9rem;
+      background: hsl(var(--background) / 0.8);
+      color: hsl(var(--muted-foreground));
+      transition:
+        border-color 180ms ease,
+        box-shadow 180ms ease;
+    }
+
+    .tag-search:focus-within {
+      border-color: hsl(var(--primary) / 0.7);
+      box-shadow: 0 0 0 3px hsl(var(--primary) / 0.12);
+    }
+
+    .tag-search input {
+      min-width: 0;
+      flex: 1;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: hsl(var(--foreground));
+      font-size: 0.875rem;
+    }
+
+    .tag-search kbd {
+      padding: 0.08rem 0.38rem;
+      border: 1px solid hsl(var(--border));
+      border-radius: 0.35rem;
+      background: hsl(var(--muted));
+      font-size: 0.7rem;
+      font-family: inherit;
+    }
+
+    .tag-grid {
+      display: grid;
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+      gap: 0.8rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .tag-card {
+      position: relative;
+      display: flex;
+      min-height: 7rem;
+      align-items: flex-start;
+      gap: 0.85rem;
+      overflow: hidden;
+      padding: 1.15rem;
+      border: 1px solid hsl(var(--border));
+      border-radius: 1.2rem;
+      background: hsl(var(--background));
+      color: hsl(var(--foreground));
+      text-decoration: none;
+      transition:
+        transform 180ms ease,
+        border-color 180ms ease,
+        box-shadow 180ms ease;
+    }
+
+    .tag-card:hover {
+      border-color: hsl(var(--primary) / 0.55);
+      color: hsl(var(--foreground));
+      box-shadow: 0 12px 30px hsl(var(--foreground) / 0.06);
+      transform: translateY(-3px);
+    }
+
+    .tag-card__index {
+      color: hsl(var(--muted-foreground) / 0.55);
+      font-size: 0.68rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .tag-card__main {
+      display: flex;
+      min-width: 0;
+      flex: 1;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .tag-card__name {
+      overflow: hidden;
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: -0.025em;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .tag-card__name > span {
+      margin-right: 0.12em;
+      color: hsl(var(--primary));
+    }
+
+    .tag-card__meta {
+      color: hsl(var(--muted-foreground));
+      font-size: 0.75rem;
+    }
+
+    .tag-card__arrow {
+      color: hsl(var(--muted-foreground));
+      transition:
+        color 180ms ease,
+        transform 180ms ease;
+    }
+
+    .tag-card:hover .tag-card__arrow {
+      color: hsl(var(--primary));
+      transform: translate(2px, -2px);
+    }
+
+    .tag-card__meter {
+      position: absolute;
+      right: 1.15rem;
+      bottom: 1rem;
+      left: 1.15rem;
+      height: 2px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: hsl(var(--muted));
+    }
+
+    .tag-card__meter span {
+      display: block;
+      width: calc(var(--tag-strength) * 100%);
+      height: 100%;
+      border-radius: inherit;
+      background: hsl(var(--primary) / 0.7);
+      transition: width 300ms ease;
+    }
+
+    .tag-empty {
+      padding: 4rem 1rem;
+      border: 1px dashed hsl(var(--border));
+      border-radius: 1.25rem;
+      color: hsl(var(--muted-foreground));
+      text-align: center;
+    }
+
+    .tag-empty__icon {
+      display: block;
+      margin-bottom: 0.4rem;
+      color: hsl(var(--primary) / 0.65);
+      font-size: 2.5rem;
+      font-weight: 650;
+    }
+
+    .tag-empty strong {
+      color: hsl(var(--foreground));
+    }
+
+    .tag-empty p {
+      margin: 0.25rem 0 0;
+      font-size: 0.85rem;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    @media (min-width: 640px) {
+      .tag-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .tag-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 639px) {
+      .tag-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .tag-search {
+        width: 100%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tag-card,
+      .tag-card__arrow {
+        transition: none;
+      }
+    }
+  </style>
+</PageLayout>

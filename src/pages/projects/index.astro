@@ -1,0 +1,380 @@
+---
+import { Icon } from 'astro-pure/user'
+import PageLayout from '@/layouts/BaseLayout.astro'
+import ProjectSection from '@/components/projects/ProjectSection.astro'
+import Sponsorship from '@/components/projects/Sponsorship.astro'
+import SponsorsOverlay from '@/components/projects/SponsorsOverlay.astro'
+import alipay from '@/assets/alipay-qrcode.jpg'
+import KeyIcon from '@/assets/icons/key.svg'
+import wechat from '@/assets/wechat-qrcode.jpg'
+
+const meta = {
+  title: '项目与赞助',
+  description: 'Programs, Learnings, and Sponsorships'
+}
+
+const sponsorsData = [
+  { name: 'Anonymous', platform: 'Wechat', amount: 0, date: '2026-01-01' }
+]
+---
+
+<PageLayout {meta}>
+  <div class='projects-page w-full px-4 md:px-8 pt-12 max-w-6xl mx-auto'>
+    
+    <div class='animate mb-12 text-center'>
+      <h1 class='text-5xl md:text-7xl font-bold tracking-tight text-foreground mb-6'>
+        项目空间 / <span class='text-primary font-serif italic'>Workspace</span>
+      </h1>
+      <p class='text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto'>
+        Scroll down to explore the projects, learnings, and ways to support my journey. 
+        Each section builds upon the last.
+      </p>
+      <div class='mt-12 animate-bounce text-muted-foreground/50'>
+        <svg class='w-6 h-6 mx-auto' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 14l-7 7m0 0l-7-7m7 7V3'></path></svg>
+      </div>
+    </div>
+
+    {/* The Glass Deck Container */}
+    <div class='relative w-full max-w-none deck-container animate'>
+
+      {/* Layer 01: GitHub Activity */}
+      <div class='sticky-card' style='z-index: 1; top: 6rem;'>
+        <div class='glass-card p-8 md:p-12 w-full'>
+          <div class='flex flex-col md:flex-row gap-6 items-start justify-between mb-10'>
+            <div>
+              <span class='inline-block px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold tracking-widest uppercase text-primary mb-4'>
+                Layer 01
+              </span>
+              <h2 class='text-3xl md:text-4xl font-bold m-0 flex items-center gap-3'>
+                <Icon name='github' class='size-8' /> Git.ActivityLog
+              </h2>
+            </div>
+            <a
+              href='https://github.com/LemonAdorable/astro-theme-iris'
+              target='_blank'
+              class='flex items-center gap-x-2 rounded-xl border border-primary/20 bg-background/50 hover:bg-primary hover:text-primary-foreground px-5 py-2.5 transition-all shadow-sm'
+            >
+              <Icon name='github' class='size-5' />
+              <span class='font-medium text-sm'>Astro-Theme-Iris</span>
+            </a>
+          </div>
+          
+          <div class='github-chart-frame flex justify-center items-center bg-foreground/5 border border-foreground/5 rounded-2xl p-6 overflow-x-auto shadow-inner w-full'>
+            <img
+              src='https://ghchart.rshah.org/659eb9/lemonadorable'
+              alt='github activities'
+              class='github-chart-img w-full min-w-[600px] max-w-[880px] object-contain drop-shadow-sm opacity-90 hover:opacity-100 transition-opacity'
+              loading='lazy'
+              decoding='async'
+              width='880'
+              height='110'
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Layer 02: Projects Grid */}
+      <div class='sticky-card' style='z-index: 2; top: 7.5rem;'>
+        <div class='glass-card p-8 md:p-12 w-full'>
+          <div class='mb-10'>
+            <span class='inline-block px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold tracking-widest uppercase text-primary mb-4'>
+              Layer 02
+            </span>
+            <h2 class='text-3xl md:text-4xl font-bold'>Projects & Learnings</h2>
+          </div>
+          
+          <div class='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full'>
+            <div class='bg-background/50 backdrop-blur-sm rounded-2xl p-6 border border-border/40 shadow-sm'>
+              <h3 class='text-xl font-bold mb-6 flex items-center gap-3'>
+                <span class='w-2 h-6 bg-red-400 rounded-full'></span> Programs
+              </h3>
+              <ProjectSection
+                projects={[
+                  { name: 'Astro Theme Iris', description: 'Pinned project on GitHub', links: [{ type: 'github', href: 'https://github.com/LemonAdorable/astro-theme-iris' }] }
+                ]}
+              />
+            </div>
+
+            <div class='bg-background/50 backdrop-blur-sm rounded-2xl p-6 border border-border/40 shadow-sm'>
+              <h3 class='text-xl font-bold mb-6 flex items-center gap-3'>
+                <span class='w-2 h-6 bg-blue-400 rounded-full'></span> Learnings
+              </h3>
+              <ProjectSection
+                projects={[
+                  { name: 'Rust', description: 'Learning notes and code for Rust', links: [{ type: 'github', href: 'https://github.com/rust-lang/rust' }] },
+                  { name: 'Blender', description: 'Learning notes and code for Blender', links: [{ type: 'github', href: 'https://www.blender.org/' }] }
+                ]}
+              />
+            </div>
+
+            <div class='bg-background/50 backdrop-blur-sm rounded-2xl p-6 border border-border/40 shadow-sm lg:col-span-1 md:col-span-2'>
+              <h3 class='text-xl font-bold mb-6 flex items-center gap-3'>
+                <span class='w-2 h-6 bg-green-400 rounded-full'></span> Others
+              </h3>
+              <div class="grid grid-cols-1 gap-6">
+                <ProjectSection
+                  projects={[
+                    { name: 'CWorld', description: "CWorld's Github", links: [{ type: 'github', href: 'https://github.com/cworld1' }] },
+                    { name: 'LemonAdorable', description: 'My Github', links: [{ type: 'github', href: 'https://github.com/LemonAdorable' }] }
+                  ]}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Layer 03: Sponsorship */}
+      <div id='sponsorship' class='sticky-card' style='z-index: 3; top: 9rem;'>
+        <div class='glass-card p-8 md:p-12 w-full'>
+          <div class='mb-10 flex flex-col md:flex-row gap-6 md:items-center justify-between border-b border-border/30 pb-8'>
+            <div>
+              <span class='inline-block px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold tracking-widest uppercase text-primary mb-4'>
+                Layer 03
+              </span>
+              <h2 class='text-3xl md:text-4xl font-bold flex items-center gap-3'>
+                <Icon name='receive-money' class='size-8 text-primary' /> Sponsorship
+              </h2>
+            </div>
+            <p class='text-sm text-muted-foreground max-w-sm'>
+              If you think it would be useful or interesting to collaborate, you can donate to support my work.
+            </p>
+          </div>
+          
+          <div class='grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-12 w-full'>
+            <div class='flex flex-col gap-8 xl:col-span-2'>
+              <div class='bg-background/40 rounded-2xl p-6 border border-border/30 shadow-inner'>
+                <h3 class='text-sm font-bold uppercase tracking-widest text-primary mb-6'>Direct Transfer</h3>
+                <div class='mb-6'>
+                  <Sponsorship
+                    methods={[
+                      { name: 'WeChat', icon: 'wechat-pay', image: wechat },
+                      { name: 'Alipay', icon: 'alipay', image: alipay }
+                    ]}
+                  />
+                </div>
+                <p class='text-sm text-muted-foreground'>
+                  Support via <a href='https://afdian.com/a/lemonadorable' target='_blank' class='text-primary hover:underline font-medium'>Afadian</a>, WeChat or Alipay.
+                </p>
+              </div>
+
+              <div class='bg-background/40 rounded-2xl p-6 border border-border/30 shadow-inner'>
+                <h3 class='text-sm font-bold uppercase tracking-widest text-primary mb-4'>Other Platforms</h3>
+                <p class='text-sm text-muted-foreground'>
+                  Support via <a href='https://ko-fi.com/lemonadorable' target='_blank' class='text-primary hover:underline font-medium'>Ko-fi</a>.
+                </p>
+              </div>
+            </div>
+
+            <div class='flex flex-col gap-8'>
+              <div class='bg-primary/5 rounded-2xl p-8 border border-primary/20 flex flex-col items-center justify-center text-center'>
+                <h3 class='text-sm font-bold uppercase tracking-widest text-primary mb-4'>Contact Mail</h3>
+                <p class='text-sm text-foreground/80 mb-6'>
+                  Please leave a message proactively after sponsorship. Click the code below to reveal email.
+                </p>
+                <div class='bg-background border border-border/50 px-6 py-3 rounded-xl cursor-pointer hover:border-primary/50 hover:shadow-md transition-all font-mono text-sm shadow-sm'
+                  onclick='const m=atob(this.textContent);alert(m);window.open(`mailto:${m}`,"_blank")'
+                  title='Click to decode'
+                >
+                  bGVtb25hZG9yYWJsZUBnbWFpbC5jb20=
+                </div>
+              </div>
+
+              <div class='bg-background/40 rounded-2xl p-8 border border-border/30 shadow-inner flex-1 flex flex-col items-center justify-center text-center'>
+                <h3 class='text-sm font-bold uppercase tracking-widest text-primary mb-6'>Recent Sponsors</h3>
+                <button
+                  data-sponsors-trigger
+                  class='inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 font-bold text-primary-foreground shadow-md transition-transform hover:scale-105'
+                >
+                  <Icon name='earth' class='size-5' /> View All Sponsors
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Layer 04: GPG Verification */}
+      <div class='sticky-card' style='z-index: 4; top: 10.5rem;'>
+        <div class='gpg-card w-full rounded-[3rem] bg-foreground text-background p-12 md:p-24 flex flex-col justify-center items-center text-center relative overflow-hidden shadow-2xl'>
+          <div class='absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-64 bg-primary/20 blur-[120px] pointer-events-none'></div>
+          
+          <div class="mb-10 inline-flex size-24 bg-background border border-primary/30 text-primary rounded-full items-center justify-center shadow-[0_0_50px_rgba(var(--color-primary),0.3)] z-10">
+            <KeyIcon class='size-12' />
+          </div>
+          <h2 id='gpg-signature' class='text-5xl md:text-6xl font-black uppercase mb-6 z-10'>GPG Verification</h2>
+          <p class='text-xl text-background/80 max-w-xl mb-10 z-10'>
+            Verify the authenticity of signed files. My current public fingerprint is securely stored below.
+          </p>
+          
+          <div class='bg-background/10 backdrop-blur-md border border-background/20 px-8 py-5 rounded-2xl font-mono text-2xl md:text-4xl font-black tracking-[0.2em] mb-12 z-10'>
+            114514
+          </div>
+          
+          <a
+            href='https://keys.openpgp.org/search?q=114514'
+            target='_blank'
+            class='inline-flex justify-center items-center gap-3 rounded-full bg-primary text-primary-foreground hover:scale-105 px-10 py-4 font-bold uppercase tracking-widest transition-transform shadow-xl z-10'
+          >
+            Fetch Public Key
+            <svg class='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M14 5l7 7m0 0l-7 7m7-7H3'></path></svg>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <SponsorsOverlay sponsors={sponsorsData} />
+  </div>
+</PageLayout>
+
+<style>
+  .deck-container {
+    position: relative;
+    padding-bottom: 2rem;
+  }
+
+  .sticky-card {
+    position: sticky;
+    width: 100%;
+    /* margin-bottom defines the scroll space before the NEXT card starts covering this one */
+    margin-bottom: 80vh; 
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .sticky-card:last-child {
+    margin-bottom: 0;
+  }
+  
+  /* Natural height cards with internal scrolling only if they exceed viewport */
+  .glass-card {
+    max-height: calc(100vh - 12rem);
+    overflow-y: auto;
+    
+    background-color: hsl(var(--background) / 0.85);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid hsl(var(--border) / 0.5);
+    border-radius: 2rem;
+    box-shadow: 0 15px 35px -5px rgba(0,0,0,0.1), 0 0 0 1px inset hsl(var(--background) / 0.5);
+  }
+
+  /* Custom scrollbar */
+  .glass-card::-webkit-scrollbar {
+    width: 6px;
+  }
+  .glass-card::-webkit-scrollbar-track {
+    background: transparent;
+    margin-block: 2rem;
+  }
+  .glass-card::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 10px;
+  }
+  .glass-card::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--primary) / 0.5);
+  }
+
+  /* Dark mode refinement */
+  :global(.dark) .glass-card {
+    background-color: hsl(var(--background) / 0.75);
+    box-shadow: 0 15px 35px -5px rgba(0,0,0,0.5), 0 0 0 1px inset hsl(var(--foreground) / 0.05);
+  }
+
+  @media (max-height: 700px) {
+    .sticky-card {
+      position: relative;
+      top: 0 !important;
+      margin-bottom: 2rem;
+    }
+    .glass-card {
+      max-height: none;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .projects-page {
+      padding-top: 2rem;
+    }
+
+    .projects-page > .animate:first-child {
+      margin-bottom: 2rem;
+    }
+
+    .projects-page h1 {
+      margin-bottom: 1rem;
+      font-size: 2.55rem;
+      line-height: 1.08;
+    }
+
+    .projects-page h1 + p {
+      font-size: 0.95rem;
+      line-height: 1.65;
+    }
+
+    .projects-page h1 + p + div {
+      margin-top: 2rem;
+    }
+
+    .deck-container {
+      display: grid;
+      gap: 1.25rem;
+      padding-bottom: 1rem;
+    }
+
+    .sticky-card {
+      position: relative;
+      top: 0 !important;
+      margin-bottom: 0;
+    }
+
+    .glass-card {
+      max-height: none;
+      overflow: visible;
+      padding: 1.25rem !important;
+      border-radius: 1.25rem;
+    }
+
+    .glass-card h2 {
+      font-size: 1.6rem;
+      line-height: 1.2;
+    }
+
+    .github-chart-frame {
+      justify-content: flex-start;
+      padding: 0.75rem;
+      border-radius: 1rem;
+    }
+
+    .github-chart-img {
+      min-width: 0 !important;
+      max-width: 100%;
+    }
+
+    .gpg-card {
+      padding: 2rem 1.25rem !important;
+      border-radius: 1.5rem;
+    }
+
+    .gpg-card h2 {
+      font-size: 2rem;
+      line-height: 1.05;
+    }
+
+    .gpg-card p {
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .gpg-card .font-mono {
+      padding-inline: 1.25rem;
+      font-size: 1.5rem;
+      letter-spacing: 0.14em;
+    }
+
+    .gpg-card a {
+      width: 100%;
+      padding-inline: 1.5rem;
+    }
+  }
+</style>

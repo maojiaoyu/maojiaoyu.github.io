@@ -1,0 +1,139 @@
+---
+interface Props {
+  class?: string
+}
+
+const { class: className } = Astro.props
+---
+
+<div id='giscus' class={className}>
+  <p class='giscus-loading'>评论正在预加载...</p>
+</div>
+
+<script>
+  let themeListenerReady = false
+
+  const giscusConfig = {
+    repo: 'LemonAdorable/lemonadorable.github.io',
+    repoId: 'R_kgDOLJXF6A',
+    category: 'Announcements',
+    categoryId: 'DIC_kwDOLJXF6M4Ccs4x',
+    mapping: 'pathname',
+    strict: '0',
+    reactionsEnabled: '1',
+    emitMetadata: '1',
+    inputPosition: 'top',
+    lang: 'zh-CN',
+    loading: 'eager',
+    crossorigin: 'anonymous'
+  }
+
+  function getTheme() {
+    const isDark = document.documentElement.classList.contains('dark')
+    return isDark ? 'transparent_dark' : 'light'
+  }
+
+  function updateGiscusTheme() {
+    const theme = getTheme()
+    const iframe = document.querySelector('iframe.giscus-frame') as HTMLIFrameElement | null
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage({ giscus: { setConfig: { theme } } }, 'https://giscus.app')
+    }
+  }
+
+  function loadGiscus(container: HTMLElement) {
+    if (!container.isConnected || container.dataset.giscusLoaded === 'true') return
+    container.dataset.giscusLoaded = 'true'
+
+    const script = document.createElement('script')
+    script.src = 'https://giscus.app/client.js'
+    script.setAttribute('data-repo', giscusConfig.repo)
+    script.setAttribute('data-repo-id', giscusConfig.repoId)
+    script.setAttribute('data-category', giscusConfig.category)
+    script.setAttribute('data-category-id', giscusConfig.categoryId)
+    script.setAttribute('data-mapping', giscusConfig.mapping)
+    script.setAttribute('data-strict', giscusConfig.strict)
+    script.setAttribute('data-reactions-enabled', giscusConfig.reactionsEnabled)
+    script.setAttribute('data-emit-metadata', giscusConfig.emitMetadata)
+    script.setAttribute('data-input-position', giscusConfig.inputPosition)
+    script.setAttribute('data-theme', getTheme())
+    script.setAttribute('data-lang', giscusConfig.lang)
+    script.setAttribute('data-loading', giscusConfig.loading)
+    script.setAttribute('crossorigin', giscusConfig.crossorigin)
+    script.async = true
+
+    container.appendChild(script)
+  }
+
+  function setupGiscus() {
+    const container = document.getElementById('giscus')
+    if (!container || container.dataset.giscusObserved === 'true') return
+    container.dataset.giscusObserved = 'true'
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return
+        observer.disconnect()
+        loadGiscus(container)
+      },
+      { rootMargin: '1800px 0px' }
+    )
+    observer.observe(container)
+
+    const idleLoad = () => {
+      observer.disconnect()
+      loadGiscus(container)
+    }
+    const idleWindow = window as Window & {
+      requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number
+    }
+    if (idleWindow.requestIdleCallback) {
+      idleWindow.requestIdleCallback(idleLoad, { timeout: 4000 })
+    } else {
+      window.setTimeout(idleLoad, 2500)
+    }
+
+    // Short pages can reach the comments before the observer's first callback.
+    if (container.getBoundingClientRect().top < window.innerHeight + 1800) {
+      observer.disconnect()
+      loadGiscus(container)
+    }
+  }
+
+  function setupThemeListener() {
+    if (themeListenerReady) return
+    themeListenerReady = true
+
+    const observer = new MutationObserver(() => {
+      updateGiscusTheme()
+    })
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    })
+  }
+
+  setupGiscus()
+  setupThemeListener()
+  document.addEventListener('astro:page-load', setupGiscus)
+</script>
+
+<style>
+  #giscus {
+    min-height: 12rem;
+    margin-top: 2rem;
+  }
+
+  .giscus-loading {
+    display: grid;
+    min-height: 12rem;
+    place-items: center;
+    margin: 0;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.8rem;
+  }
+
+  #giscus:has(iframe.giscus-frame) .giscus-loading {
+    display: none;
+  }
+</style>

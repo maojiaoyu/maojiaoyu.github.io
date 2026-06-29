@@ -1,0 +1,642 @@
+---
+import links from '@/public/links.json'
+import config from 'virtual:config'
+
+import { Icon, Timeline } from 'astro-pure/user'
+import PageLayout from '@/layouts/BaseLayout.astro'
+import { Giscus } from '@/components/giscus'
+import KnowledgeIndexHero from '@/components/KnowledgeIndexHero.astro'
+import FriendApplyGuide from '@/components/links/FriendApplyGuide.astro'
+import FriendList from '@/components/links/FriendList.astro'
+
+const { friends } = links
+const linksConf = config.integ.links
+type LinkGroup = (typeof friends)[number] & { title?: string }
+const inactiveGroup = friends.find(({ id_name }) => id_name === 'inactive-links')
+const linkCategories = (friends as LinkGroup[]).filter(
+  ({ id_name }) => id_name !== 'inactive-links'
+)
+const categoryLabels: Record<string, string> = {
+  'cf-links': '好友链接',
+  'special-links': '特殊链接'
+}
+const getCategoryLabel = (category: LinkGroup) =>
+  category.title ?? categoryLabels[category.id_name] ?? category.id_name
+const activeLinks = linkCategories[0]?.link_list.length ?? 0
+const collectedLinks = linkCategories.reduce((total, group) => total + group.link_list.length, 0)
+const linkApplyPage =
+  'https://github.com/LemonAdorable/lemonadorable.github.io/issues/new?template=friend-link.yml'
+const linkEditPage =
+  'https://github.com/LemonAdorable/lemonadorable.github.io/blob/main/public/links.json'
+
+const meta = {
+  title: '链接',
+  description: '友好往来、持续阅读，以及互联网中的邻居。'
+}
+---
+
+<PageLayout {meta}>
+  <main class='links-page mt-6 lg:mt-10'>
+    <KnowledgeIndexHero
+      icon='link'
+      eyebrow='Web neighborhood'
+      title='链接'
+      description='友好往来、持续阅读，以及互联网中的邻居。'
+      stats={[
+        { label: '收录站点', value: collectedLinks },
+        { label: '好友链接', value: activeLinks },
+        { label: '链接分类', value: linkCategories.length }
+      ]}
+      statsLabel='链接统计'
+      symbol='∞'
+    />
+
+    <div class='links-stack animate'>
+      <div class='link-browser' data-link-switcher>
+        <div class='link-tabs-container relative'>
+          <div class='link-tabs not-prose' role='tablist' aria-label='链接分类'>
+            {
+              linkCategories.map((category, index) => (
+                <button
+                  type='button'
+                  role='tab'
+                  id={`link-tab-${category.id_name}`}
+                  aria-controls={`link-panel-${category.id_name}`}
+                  aria-selected={index === 0 ? 'true' : 'false'}
+                  aria-expanded={index === 0 ? 'true' : 'false'}
+                  tabindex={index === 0 ? 0 : -1}
+                  data-link-tab={category.id_name}
+                >
+                  <span>{getCategoryLabel(category)}</span>
+                  <small>{category.link_list.length}</small>
+                </button>
+              ))
+            }
+          </div>
+          <div class='link-tab-indicator hidden sm:block' data-link-tab-indicator></div>
+        </div>
+
+        <div class='link-category-stage'>
+          <div class='link-category-stage__inner'>
+            {
+              linkCategories.map((category, index) => (
+                <section
+                  class='links-panel links-panel--category'
+                  role='tabpanel'
+                  id={`link-panel-${category.id_name}`}
+                  aria-labelledby={`link-tab-${category.id_name}`}
+                  hidden={index !== 0}
+                  data-link-panel={category.id_name}
+                >
+                  <header class='links-panel__header'>
+                    <span class='links-panel__icon' aria-hidden='true'>
+                      <Icon name={category.id_name === 'cf-links' ? 'link' : 'earth'} />
+                    </span>
+                    <div>
+                      <h2>{getCategoryLabel(category)}</h2>
+                      {category.id_name === 'cf-links' && <p>链接随机排序。</p>}
+                    </div>
+                    <strong>{category.link_list.length}</strong>
+                  </header>
+
+                  {category.id_name === 'cf-links' ? (
+                    <>
+                      <div class='friend-sections' data-friend-sections>
+                        <div class='friend-section-tabs-container relative mb-4'>
+                          <div
+                            class='friend-section-tabs not-prose'
+                            role='tablist'
+                            aria-label='好友链接内容'
+                          >
+                            <button
+                              type='button'
+                              role='tab'
+                              id='friend-section-links'
+                              aria-controls='friend-section-panel-links'
+                              aria-selected='true'
+                              data-friend-tab='links'
+                            >
+                              正常链接
+                              <small>{category.link_list.length}</small>
+                            </button>
+                            <button
+                              type='button'
+                              role='tab'
+                              id='friend-section-inactive'
+                              aria-controls='friend-section-panel-inactive'
+                              aria-selected='false'
+                              tabindex='-1'
+                              data-friend-tab='inactive'
+                            >
+                              异常链接
+                              <small>{inactiveGroup?.link_list.length ?? 0}</small>
+                            </button>
+                            <button
+                              type='button'
+                              role='tab'
+                              id='friend-section-history'
+                              aria-controls='friend-section-panel-history'
+                              aria-selected='false'
+                              tabindex='-1'
+                              data-friend-tab='history'
+                            >
+                              变更记录
+                              <small>{linksConf.logbook.length}</small>
+                            </button>
+                          </div>
+                          <div class='friend-tab-indicator' data-friend-tab-indicator />
+                        </div>
+
+                        <div
+                          role='tabpanel'
+                          id='friend-section-panel-links'
+                          aria-labelledby='friend-section-links'
+                          data-friend-panel='links'
+                        >
+                          <FriendList list={category} />
+                        </div>
+                        <div
+                          role='tabpanel'
+                          id='friend-section-panel-inactive'
+                          aria-labelledby='friend-section-inactive'
+                          data-friend-panel='inactive'
+                          hidden
+                        >
+                          {inactiveGroup && <FriendList list={inactiveGroup} />}
+                        </div>
+                        <div
+                          role='tabpanel'
+                          id='friend-section-panel-history'
+                          aria-labelledby='friend-section-history'
+                          data-friend-panel='history'
+                          hidden
+                        >
+                          <Timeline events={linksConf.logbook} />
+                        </div>
+                      </div>
+
+                      <FriendApplyGuide
+                        info={linksConf.applyTip}
+                        applyUrl={linkApplyPage}
+                        editUrl={linkEditPage}
+                      />
+                    </>
+                  ) : (
+                    <FriendList list={category} />
+                  )}
+                </section>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+
+      <section class='links-panel links-panel--feed' aria-labelledby='neighbor-feed'>
+        <header class='links-panel__header'>
+          <span class='links-panel__icon' aria-hidden='true'><Icon name='rss' /></span>
+          <h2 id='neighbor-feed'>邻站动态</h2>
+        </header>
+
+        <div id='friend-circle-lite-root' class='not-prose relative opacity-0 transition-opacity duration-300'>
+          <div class='friend-feed-loading' role='status'>正在获取邻站动态...</div>
+        </div>
+        <script>
+          import '@/assets/styles/fc.css'
+
+          import { FriendCircle } from '@/plugins/friendCircle'
+
+          function setupFriendCircle() {
+            const root = document.getElementById('friend-circle-lite-root')
+            if (!root || root.dataset.initialized === 'true') return
+            root.dataset.initialized = 'true'
+
+            const fc = new FriendCircle()
+            fc.init({
+              private_api_url:
+                import.meta.env.PUBLIC_FRIEND_CIRCLE_API_URL ??
+                'https://lemonadorable.github.io/friend-circle-lite/',
+              page_turning_number: 12,
+              error_img: '/favicon/favicon.gif'
+            })
+            fc.load()
+            
+            // Show root after a short delay to ensure styles are applied
+            setTimeout(() => {
+              root.classList.remove('opacity-0')
+            }, 100)
+          }
+
+          setupFriendCircle()
+          document.addEventListener('astro:page-load', setupFriendCircle)
+        </script>
+      </section>
+    </div>
+
+    {config.integ.giscus?.enable && <Giscus class='links-comments' />}
+  </main>
+</PageLayout>
+
+<style>
+  .links-page {
+    margin-inline: auto;
+    width: min(100%, 70rem);
+    padding-bottom: 4rem;
+  }
+
+  .links-stack {
+    display: grid;
+    gap: 1.25rem;
+    margin-top: 2.75rem;
+    overflow-anchor: none;
+  }
+
+  .link-category-stage {
+    display: grid;
+    grid-template-rows: 1fr;
+    margin-top: 0.75rem;
+    opacity: 1;
+    transition:
+      grid-template-rows 360ms cubic-bezier(0.22, 1, 0.36, 1),
+      margin-top 360ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 220ms ease;
+  }
+
+  .link-category-stage__inner {
+    min-height: 0;
+    overflow: hidden;
+    overflow-anchor: none;
+  }
+
+  .link-browser.is-collapsed .link-category-stage {
+    grid-template-rows: 0fr;
+    margin-top: 0;
+    opacity: 0;
+  }
+
+  .links-panel {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(1.1rem, 2.5vw, 1.75rem);
+    border: 1px solid hsl(var(--border) / 0.82);
+    border-radius: 1.5rem;
+    background:
+      radial-gradient(circle at 100% 0%, hsl(var(--primary) / 0.1), transparent 30%),
+      linear-gradient(145deg, hsl(var(--muted) / 0.42), hsl(var(--background) / 0.58));
+    box-shadow:
+      inset 0 1px 0 hsl(var(--background) / 0.62),
+      0 22px 50px -42px hsl(var(--foreground) / 0.45);
+  }
+
+  .links-panel--feed {
+    scroll-margin-top: 5rem;
+    background:
+      radial-gradient(circle at 0% 0%, hsl(var(--primary) / 0.12), transparent 28%),
+      linear-gradient(145deg, hsl(var(--accent) / 0.48), hsl(var(--muted) / 0.36));
+  }
+
+  .friend-feed-loading {
+    display: grid;
+    min-height: 12rem;
+    place-items: center;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.8rem;
+  }
+
+  .links-panel__header {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .links-panel__icon {
+    display: grid;
+    flex: 0 0 auto;
+    width: 2.6rem;
+    height: 2.6rem;
+    place-items: center;
+    border: 1px solid hsl(var(--primary) / 0.18);
+    border-radius: 0.85rem;
+    color: hsl(var(--primary));
+    background: hsl(var(--primary) / 0.09);
+  }
+
+  .links-panel__header h2 {
+    margin: 0;
+    font-size: clamp(1.1rem, 2vw, 1.35rem);
+    line-height: 1.2;
+  }
+
+  .links-panel__header p {
+    margin: 0.28rem 0 0;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.8rem;
+  }
+
+  .link-tabs {
+    display: flex;
+    gap: 1.25rem;
+    overflow-x: auto;
+    padding: 0 0.15rem;
+    border-bottom: 1px solid hsl(var(--border) / 0.68);
+    scrollbar-width: none;
+  }
+
+  .link-tab-indicator {
+    position: absolute;
+    bottom: -1px;
+    height: 2px;
+    background: hsl(var(--primary));
+    transition: all 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .link-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .link-tabs button {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 2.8rem;
+    margin-bottom: -1px;
+    padding: 0.45rem 0.1rem;
+    border: 0;
+    color: hsl(var(--muted-foreground));
+    background: transparent;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.82rem;
+    transition: color 160ms ease;
+  }
+
+  .link-tabs button:hover {
+    color: hsl(var(--foreground));
+  }
+
+  .link-tabs button[aria-selected='true'] {
+    color: hsl(var(--primary));
+  }
+
+  .link-browser.is-collapsed .link-tabs button[aria-selected='true'] {
+    color: hsl(var(--muted-foreground));
+  }
+
+  .link-tabs small {
+    display: grid;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    place-items: center;
+    padding-inline: 0.25rem;
+    border-radius: 999px;
+    color: currentColor;
+    background: hsl(var(--muted) / 0.68);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+  }
+
+  .links-panel__header strong {
+    margin-left: auto;
+    color: hsl(var(--primary) / 0.64);
+    font-family: var(--font-mono);
+    font-size: 1.45rem;
+    font-weight: 500;
+  }
+
+  .friend-section-tabs {
+    position: relative;
+    display: flex;
+    gap: 0.35rem;
+    overflow-x: auto;
+    padding: 0.25rem;
+    border-radius: 0.9rem;
+    background: hsl(var(--muted) / 0.48);
+    scrollbar-width: none;
+    z-index: 1;
+  }
+
+  .friend-tab-indicator {
+    position: absolute;
+    top: 0.25rem;
+    bottom: 0.25rem;
+    left: 0.25rem;
+    background: hsl(var(--background) / 0.82);
+    border-radius: 0.68rem;
+    box-shadow: 0 5px 16px -14px hsl(var(--foreground) / 0.6);
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .friend-section-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .friend-section-tabs button {
+    position: relative;
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.25rem;
+    padding: 0.45rem 0.7rem;
+    border: 0;
+    border-radius: 0.68rem;
+    color: hsl(var(--muted-foreground));
+    background: transparent;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.78rem;
+    z-index: 1;
+    transition: color 0.2s;
+  }
+
+  .friend-section-tabs button[aria-selected='true'] {
+    color: hsl(var(--foreground));
+  }
+
+  .friend-section-tabs small {
+    color: hsl(var(--primary));
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+  }
+
+  /* Animation for timeline events */
+  :global(.timeline-event) {
+    opacity: 0;
+    transform: translateY(15px);
+    transition:
+      opacity 0.5s ease-out,
+      transform 0.5s ease-out;
+  }
+
+  :global(.timeline-event.is-visible) {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  :global(.links-comments) {
+    margin-top: 3rem;
+  }
+
+  @media (max-width: 640px) {
+    .links-stack {
+      margin-top: 1.5rem;
+    }
+
+    .links-panel {
+      border-radius: 1.2rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .link-category-stage {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  function updateIndicator(
+    tabsContainer: HTMLElement,
+    indicator: HTMLElement,
+    attribute = 'aria-selected'
+  ) {
+    const activeTab = tabsContainer.querySelector<HTMLButtonElement>(`button[${attribute}='true']`)
+    if (activeTab && indicator) {
+      indicator.style.width = `${activeTab.offsetWidth}px`
+      indicator.style.left = `${activeTab.offsetLeft}px`
+      if (tabsContainer.classList.contains('link-tabs')) {
+        // Main tabs indicator logic (bottom bar)
+        indicator.style.opacity = document
+          .querySelector('.link-browser')
+          ?.classList.contains('is-collapsed')
+          ? '0.3'
+          : '1'
+      }
+    }
+  }
+
+  function setupLinkTabs() {
+    document.querySelectorAll<HTMLElement>('[data-link-switcher]').forEach((container) => {
+      const tabsContainer = container.querySelector<HTMLElement>('.link-tabs')
+      const indicator = container.querySelector<HTMLElement>('[data-link-tab-indicator]')
+      const tabs = [...container.querySelectorAll<HTMLButtonElement>('[data-link-tab]')]
+      const panels = [...container.querySelectorAll<HTMLElement>('[data-link-panel]')]
+      if (
+        !tabsContainer ||
+        !indicator ||
+        tabs.length === 0 ||
+        container.dataset.tabsReady === 'true'
+      )
+        return
+
+      container.dataset.tabsReady = 'true'
+
+      const selectTab = (selected: HTMLButtonElement, focus = false) => {
+        const category = selected.dataset.linkTab
+
+        // Ensure container is never collapsed
+        container.classList.remove('is-collapsed')
+
+        tabs.forEach((tab) => {
+          const active = tab === selected
+          tab.setAttribute('aria-selected', String(active))
+          tab.setAttribute('aria-expanded', 'true') // Always expanded
+          tab.tabIndex = active ? 0 : -1
+        })
+
+        panels.forEach((panel) => {
+          const isTarget = panel.dataset.linkPanel === category
+          panel.hidden = !isTarget
+          if (isTarget) {
+            panel.dispatchEvent(
+              new CustomEvent('friend-panel-shown', { bubbles: true, detail: panel })
+            )
+          }
+        })
+
+        if (focus) selected.focus()
+        updateIndicator(tabsContainer, indicator)
+      }
+
+      tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => selectTab(tab))
+        tab.addEventListener('keydown', (event) => {
+          if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
+          event.preventDefault()
+          const offset = event.key === 'ArrowRight' ? 1 : -1
+          selectTab(tabs[(index + offset + tabs.length) % tabs.length], true)
+        })
+      })
+
+      // Initial position
+      setTimeout(() => updateIndicator(tabsContainer, indicator), 100)
+      window.addEventListener('resize', () => updateIndicator(tabsContainer, indicator))
+    })
+  }
+
+  function setupFriendSectionTabs() {
+    document.querySelectorAll<HTMLElement>('[data-friend-sections]').forEach((container) => {
+      const tabsContainer = container.querySelector<HTMLElement>('.friend-section-tabs')
+      const indicator = container.querySelector<HTMLElement>('[data-friend-tab-indicator]')
+      const tabs = [...container.querySelectorAll<HTMLButtonElement>('[data-friend-tab]')]
+      const panels = [...container.querySelectorAll<HTMLElement>('[data-friend-panel]')]
+      if (
+        !tabsContainer ||
+        !indicator ||
+        tabs.length === 0 ||
+        container.dataset.tabsReady === 'true'
+      )
+        return
+
+      container.dataset.tabsReady = 'true'
+      const selectTab = (selected: HTMLButtonElement, focus = false) => {
+        const section = selected.dataset.friendTab
+
+        tabs.forEach((tab) => {
+          const active = tab === selected
+          tab.setAttribute('aria-selected', String(active))
+          tab.tabIndex = active ? 0 : -1
+        })
+
+        panels.forEach((panel) => {
+          const isTarget = panel.dataset.friendPanel === section
+          panel.hidden = !isTarget
+          if (isTarget) {
+            panel.dispatchEvent(
+              new CustomEvent('friend-panel-shown', { bubbles: true, detail: panel })
+            )
+          }
+        })
+
+        if (focus) selected.focus()
+        updateIndicator(tabsContainer, indicator)
+      }
+
+      tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => selectTab(tab))
+        tab.addEventListener('keydown', (event) => {
+          if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
+          event.preventDefault()
+          const offset = event.key === 'ArrowRight' ? 1 : -1
+          selectTab(tabs[(index + offset + tabs.length) % tabs.length], true)
+        })
+      })
+
+      // Initial position
+      setTimeout(() => updateIndicator(tabsContainer, indicator), 100)
+      window.addEventListener('resize', () => updateIndicator(tabsContainer, indicator))
+    })
+  }
+
+  setupLinkTabs()
+  setupFriendSectionTabs()
+  document.addEventListener('astro:page-load', () => {
+    setupLinkTabs()
+    setupFriendSectionTabs()
+  })
+</script>

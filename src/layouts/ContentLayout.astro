@@ -1,0 +1,535 @@
+---
+import { BackToTop } from 'astro-pure/components/pages'
+import type { SiteMeta } from 'astro-pure/types'
+import { Button, Icon } from 'astro-pure/user'
+import { cn } from 'astro-pure/utils'
+import PageLayout from '@/layouts/BaseLayout.astro'
+import { integ } from '@/site-config'
+
+interface Props {
+  meta: SiteMeta
+  highlightColor?: string
+  back?: string
+  hideBack?: boolean
+  mainClass?: string
+  sidebarClass?: string
+  mode?: 'default' | 'article' | 'centered' | 'wide'
+  commentTarget?: string
+  graphTarget?: string
+}
+
+const {
+  meta,
+  highlightColor,
+  back = '/',
+  hideBack = false,
+  mainClass,
+  sidebarClass,
+  mode = 'default',
+  commentTarget,
+  graphTarget,
+  ...props
+} = Astro.props
+
+const hasSidebar = mode === 'default' || mode === 'article'
+const isSingleColumn = mode === 'centered' || mode === 'wide'
+---
+
+<PageLayout {meta} {highlightColor} {...props}>
+  <div class='reading-progress' aria-hidden='true'>
+    <div id='reading-progress-bar' class='reading-progress-bar'></div>
+  </div>
+  {
+    !hideBack && mode !== 'article' && (
+      <Button
+        title='Back'
+        href={back}
+        onclick='history.back(); return false;'
+        data-astro-prefetch='false'
+        variant='back'
+      />
+    )
+  }
+  <main
+    class={cn(
+      'mt-6 items-start',
+      mode === 'article'
+        ? 'article-reading-layout'
+        : isSingleColumn
+          ? mode === 'wide'
+            ? 'single-page-layout single-page-wide'
+            : 'single-page-layout single-page-centered'
+          : 'gap-x-10 md:flex',
+      mainClass
+    )}
+  >
+    {
+      mode === 'article' && (
+        <aside class='article-left-rail animate'>
+          <slot name='left-sidebar' />
+        </aside>
+      )
+    }
+    {
+      hasSidebar && (
+        <>
+          {/* Sidebar */}
+          <aside
+            class={cn(
+              'animate top-20 min-w-48 basis-60 overflow-y-scroll max-md:hidden z-40 fixed md:sticky md:order-2 lg:shrink-0 max-md:border max-md:px-4 max-md:py-3 max-md:bg-muted max-md:rounded-xl',
+              mode === 'article' && 'article-toc-rail',
+              sidebarClass
+            )}
+            style='max-height:calc(100vh - 7rem); display: flex; flex-direction: column;'
+            id='sidebar'
+          >
+            <slot name='sidebar' />
+          </aside>
+          <div
+            id='sidebar-shade'
+            class='fixed top-0 start-0 w-full h-full'
+            style='display:none;background-color:#00000091;z-index:31'
+          />
+        </>
+      )
+    }
+
+    <article
+      class={cn(
+        'min-w-0 grow',
+        mode === 'article' && 'article-reading-column',
+        isSingleColumn && 'single-page-column'
+      )}
+    >
+      {/* Content header */}
+      <div id='content-header' class='animate'>
+        <slot name='header' />
+      </div>
+
+      {/* Content */}
+      <div
+        id='content'
+        class={cn(
+          'max-w-none animate mt-4 md:min-w-[45ch] overflow-x-hidden',
+          integ.typography.class
+        )}
+      >
+        <slot />
+      </div>
+      <slot name='content-after' />
+    </article>
+  </main>
+
+  <div
+    class={cn(
+      'bottom mt-6 items-start gap-x-10 md:flex',
+      mode === 'article' && 'article-bottom',
+      isSingleColumn && [
+        'single-page-bottom',
+        mode === 'wide' ? 'single-page-wide' : 'single-page-centered'
+      ]
+    )}
+  >
+    {/* Bottom */}
+    <div class='flex-1 text-muted-foreground md:min-w-[50ch]'>
+      <slot name='bottom' />
+    </div>
+    <div class='min-w-48 basis-60'>
+      <slot name='bottom-sidebar' />
+    </div>
+  </div>
+
+  <BackToTop header='content-header' content='content' slot='overlay'>
+    {
+      graphTarget && (
+        <button
+          slot='other-icons'
+          type='button'
+          aria-label='跳转到知识图谱'
+          title='知识图谱'
+          class='size-10 flex items-center justify-center rounded-full border-2 border-transparent bg-muted text-muted-foreground duration-300 hover:border-border/75 hover:text-primary sm:size-12'
+          data-graph-jump={graphTarget}
+        >
+          <svg
+            viewBox='0 0 24 24'
+            class='size-5'
+            fill='none'
+            stroke='currentColor'
+            stroke-width='1.8'
+            stroke-linecap='round'
+            stroke-linejoin='round'
+            aria-hidden='true'
+          >
+            <circle cx='6' cy='6' r='2.25' />
+            <circle cx='18' cy='7' r='2.25' />
+            <circle cx='8' cy='18' r='2.25' />
+            <circle cx='18' cy='17' r='2.25' />
+            <path d='m8 6.3 7.8.5M7.2 8l-.4 7.8m3.2 1.8 5.8-.5m1-7.9.4 5.5M8 8l8 7.2' />
+          </svg>
+        </button>
+      )
+    }
+    {
+      commentTarget && (
+        <button
+          slot='other-icons'
+          type='button'
+          aria-label='跳转到评论'
+          title='评论'
+          class='size-10 flex items-center justify-center rounded-full border-2 border-transparent bg-muted text-muted-foreground duration-300 hover:border-border/75 hover:text-primary sm:size-12'
+          data-comment-jump={commentTarget}
+        >
+          <svg
+            viewBox='0 0 24 24'
+            class='size-5'
+            fill='none'
+            stroke='currentColor'
+            stroke-width='2'
+            stroke-linecap='round'
+            stroke-linejoin='round'
+            aria-hidden='true'
+          >
+            <path d='M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z' />
+          </svg>
+        </button>
+      )
+    }
+    {
+      hasSidebar && (
+        <button
+          slot='other-icons'
+          aria-label='Toggle sidebar'
+          class='size-10 flex items-center justify-center rounded-full border-2 border-transparent bg-muted text-muted-foreground duration-300 hover:border-border/75 md:hidden sm:size-12'
+          id='sidebar-btn'
+        >
+          <Icon name='list' />
+        </button>
+      )
+    }
+  </BackToTop>
+</PageLayout>
+
+<script>
+  function setupSidebar() {
+    const sidebar = document.getElementById('sidebar')
+    const sidebarBtn = document.getElementById('sidebar-btn')
+    const sidebarShade = document.getElementById('sidebar-shade')
+
+    if (!sidebar || !sidebarBtn || !sidebarShade || sidebarBtn.dataset.sidebarReady === 'true')
+      return
+
+    sidebarBtn.dataset.sidebarReady = 'true'
+
+    function toggleSidebar() {
+      sidebar?.classList.toggle('show')
+      sidebarShade?.classList.toggle('show')
+    }
+
+    sidebarBtn.addEventListener('click', toggleSidebar)
+    sidebarShade.addEventListener('click', toggleSidebar)
+  }
+
+  function setupReadingProgress() {
+    const progressBar = document.getElementById('reading-progress-bar')
+    const contentEl = document.getElementById('content')
+    if (!progressBar || !contentEl || progressBar.dataset.ready === 'true') return
+
+    progressBar.dataset.ready = 'true'
+    let ticking = false
+
+    const updateReadingProgress = () => {
+      const scrollTop = Math.max(0, window.scrollY || document.documentElement.scrollTop)
+      const maxScrollable = Math.max(
+        0,
+        contentEl.offsetTop + contentEl.scrollHeight - window.innerHeight
+      )
+      const progress = maxScrollable === 0 ? 0 : Math.min(1, Math.max(0, scrollTop / maxScrollable))
+      progressBar.style.transform = `scaleX(${progress})`
+      ticking = false
+    }
+
+    const requestProgressUpdate = () => {
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(updateReadingProgress)
+    }
+
+    document.addEventListener('scroll', requestProgressUpdate, { passive: true })
+    window.addEventListener('resize', requestProgressUpdate)
+    updateReadingProgress()
+  }
+
+  function setupCommentJump() {
+    document.querySelectorAll<HTMLButtonElement>('[data-comment-jump]').forEach((button) => {
+      if (button.dataset.ready === 'true') return
+      button.dataset.ready = 'true'
+      button.addEventListener('click', () => {
+        const target = document.querySelector(button.dataset.commentJump || '')
+        target?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
+    })
+  }
+
+  function setupGraphJump() {
+    document.querySelectorAll<HTMLButtonElement>('[data-graph-jump]').forEach((button) => {
+      if (button.dataset.ready === 'true') return
+      button.dataset.ready = 'true'
+      button.addEventListener('click', () => {
+        const target = document.querySelector(button.dataset.graphJump || '')
+        if (!target) return
+
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        target.classList.remove('graph-view-locate-highlight')
+        void (target as HTMLElement).offsetWidth
+        target.classList.add('graph-view-locate-highlight')
+        setTimeout(() => target.classList.remove('graph-view-locate-highlight'), 2200)
+      })
+    })
+  }
+
+  setupSidebar()
+  setupReadingProgress()
+  setupCommentJump()
+  setupGraphJump()
+  document.addEventListener('astro:page-load', () => {
+    setupSidebar()
+    setupReadingProgress()
+    setupCommentJump()
+    setupGraphJump()
+  })
+</script>
+
+<style>
+  .reading-progress {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 50;
+    height: 3px;
+    pointer-events: none;
+  }
+
+  :global(.graph-view-locate-highlight .graph-canvas) {
+    animation: graph-view-locate 720ms ease-in-out 3;
+  }
+
+  @keyframes graph-view-locate {
+    0%,
+    100% {
+      border-color: hsl(var(--border) / 0.6);
+      box-shadow: 0 0 0 0 hsl(var(--primary) / 0);
+    }
+    50% {
+      border-color: hsl(var(--primary) / 0.72);
+      box-shadow: 0 0 0 0.28rem hsl(var(--primary) / 0.1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.graph-view-locate-highlight .graph-canvas) {
+      animation: none;
+      border-color: hsl(var(--primary) / 0.72);
+    }
+  }
+
+  .reading-progress-bar {
+    width: 100%;
+    height: 100%;
+    background: hsl(var(--primary));
+    box-shadow: 0 0 12px hsl(var(--primary) / 0.45);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 60ms ease-out;
+  }
+
+  @media (min-width: 770px) {
+    #sidebar-shade {
+      display: none !important;
+    }
+  }
+
+  @media (max-width: 769px) {
+    #sidebar.show {
+      display: flex !important;
+      pointer-events: auto;
+    }
+
+    #sidebar-shade.show {
+      display: block !important;
+      opacity: 1;
+      pointer-events: auto;
+      animation: 300ms fade-in-side !important;
+      animation-fill-mode: forwards;
+    }
+
+    @keyframes fade-in-side {
+      0% {
+        transform: translateX(50%);
+        opacity: 0;
+      }
+      100% {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    #sidebar {
+      display: none !important;
+      pointer-events: none;
+      animation: none !important;
+      position: fixed !important;
+      right: 0;
+      top: 0 !important;
+      height: 100vh !important;
+      max-height: 100vh !important;
+      min-width: 40vw !important;
+      max-width: 75vw !important;
+      overflow-y: auto !important;
+      border-top-right-radius: 0 !important;
+      border-bottom-right-radius: 0 !important;
+      padding-top: 1.5rem !important;
+      padding-bottom: 1.5rem !important;
+      background-color: hsl(var(--background)) !important;
+    }
+
+    :global(#action-buttons button) {
+      pointer-events: auto !important;
+    }
+    #sidebar-shade {
+      animation: 300ms fade-in;
+    }
+  }
+  @media (max-width: 640px) {
+    #sidebar {
+      min-width: 55vw !important;
+    }
+  }
+</style>
+
+<style is:global>
+  .article-reading-layout {
+    width: min(78rem, calc(100vw - 3rem));
+    margin-inline: 50%;
+    display: grid;
+    grid-template-columns: minmax(10rem, 1fr) minmax(0, 44rem) minmax(10rem, 1fr);
+    gap: clamp(1rem, 2.5vw, 2rem);
+    transform: translateX(-50%);
+  }
+
+  .article-reading-column {
+    grid-column: 2;
+  }
+
+  .article-left-rail {
+    position: sticky;
+    top: 8.5rem !important;
+    grid-column: 1;
+    grid-row: 1;
+    align-self: start;
+    min-width: 0;
+    max-height: calc(100vh - 9rem) !important;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  .article-toc-rail {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: start;
+    order: initial;
+    min-width: 0;
+    max-height: calc(100vh - 9rem) !important;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    position: sticky;
+    top: 8.5rem !important;
+    scrollbar-width: thin;
+  }
+
+  .article-bottom {
+    width: min(44rem, 100%);
+    margin-inline: auto;
+    display: block;
+  }
+
+  .article-bottom > :first-child {
+    width: 100%;
+  }
+
+  .article-bottom > :last-child {
+    display: none;
+  }
+
+  .single-page-layout,
+  .single-page-bottom {
+    width: 100%;
+    margin-inline: auto;
+  }
+
+  .single-page-centered {
+    max-width: 52rem;
+  }
+
+  .single-page-wide {
+    max-width: 64rem;
+  }
+
+  .single-page-column,
+  .single-page-bottom > :first-child {
+    width: 100%;
+  }
+
+  .single-page-bottom {
+    display: block;
+  }
+
+  .single-page-bottom > :last-child {
+    display: none;
+  }
+
+  @media (max-width: 1199px) and (min-width: 770px) {
+    .article-reading-layout {
+      width: 100%;
+      margin-inline: 0;
+      grid-template-columns: minmax(0, 44rem) minmax(11rem, 14rem);
+      justify-content: center;
+      transform: none;
+    }
+
+    .article-reading-column {
+      grid-column: 1;
+    }
+
+    .article-left-rail {
+      display: none;
+    }
+
+    .article-toc-rail {
+      grid-column: 2;
+    }
+  }
+
+  @media (max-width: 769px) {
+    .article-reading-layout {
+      width: 100%;
+      margin-inline: 0;
+      display: block;
+      transform: none;
+    }
+
+    .article-reading-column {
+      width: 100%;
+    }
+
+    .article-left-rail {
+      display: none;
+    }
+
+    .article-bottom {
+      width: 100%;
+    }
+  }
+</style>

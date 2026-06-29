@@ -1,0 +1,156 @@
+---
+import type { LinkInsight } from '@/utils/category-insights'
+
+interface Props {
+  inbound: LinkInsight[]
+  outbound: LinkInsight[]
+}
+
+const { inbound, outbound } = Astro.props
+---
+
+{
+  (inbound.length > 0 || outbound.length > 0) && (
+    <section class='link-insights' aria-label='入链与出链详情'>
+      {inbound.length > 0 && (
+        <details>
+          <summary>
+            <span>查看入链</span>
+            <small>{inbound.length} 条</small>
+          </summary>
+          <ul>
+            {inbound.map((link) => (
+              <li>
+                <a href={link.locateHref} title='打开来源文章并定位到引用处'>
+                  <span>
+                    <strong>{link.sourceTitle}</strong>
+                    <small>引用了 {link.targetTitle}</small>
+                  </span>
+                  <span class='locate-label'>定位 ↗</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+
+      {outbound.length > 0 && (
+        <details>
+          <summary>
+            <span>查看出链</span>
+            <small>{outbound.length} 条</small>
+          </summary>
+          <ul>
+            {outbound.map((link) => (
+              <li>
+                <a href={link.locateHref} title='打开来源文章并定位到引用处'>
+                  <span>
+                    <strong>{link.sourceTitle}</strong>
+                    <small>链接到 {link.targetTitle}</small>
+                  </span>
+                  <span class='locate-label'>定位 ↗</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </section>
+  )
+}
+
+<style>
+  .link-insights {
+    display: grid;
+    gap: 0.45rem;
+    margin-top: 0.75rem;
+  }
+
+  details {
+    overflow: hidden;
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.75rem;
+    background: hsl(var(--muted) / 0.22);
+  }
+
+  summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.58rem 0.7rem;
+    cursor: pointer;
+    font-size: 0.74rem;
+    list-style: none;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  summary::before {
+    margin-right: 0.45rem;
+    color: hsl(var(--muted-foreground));
+    content: '›';
+    transition: transform 150ms ease;
+  }
+
+  details[open] summary::before {
+    transform: rotate(90deg);
+  }
+
+  summary > span {
+    flex: 1;
+  }
+
+  summary small {
+    color: hsl(var(--muted-foreground));
+    font-size: 0.66rem;
+  }
+
+  ul {
+    margin: 0;
+    padding: 0 0.45rem 0.45rem;
+    list-style: none;
+  }
+
+  li + li {
+    border-top: 1px solid hsl(var(--border) / 0.7);
+  }
+
+  a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.7rem;
+    padding: 0.55rem 0.3rem;
+  }
+
+  a > span:first-child {
+    min-width: 0;
+  }
+
+  strong,
+  a small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  strong {
+    font-size: 0.72rem;
+    font-weight: 560;
+  }
+
+  a small {
+    margin-top: 0.12rem;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.63rem;
+  }
+
+  .locate-label {
+    flex: 0 0 auto;
+    color: hsl(var(--primary));
+    font-size: 0.66rem;
+  }
+</style>

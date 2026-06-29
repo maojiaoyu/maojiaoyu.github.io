@@ -1,0 +1,167 @@
+---
+title: Redmi Note5无法进入Fastboot屏幕无输出救砖
+publishDate: "2025-01-30 22:19:29"
+description: Redmi Note5无法进入Fastboot模式且屏幕无输出的救砖教程
+tags:
+  - Flash
+  - Android
+  - 救砖
+draft: false
+comment: true
+language: 中文
+---
+
+import { Aside } from 'astro-pure/user'
+
+## 问题描述
+
+Redmi Note5在刷机过程中变砖，无法进入Fastboot模式，屏幕无输出。需要使用9008模式进行救砖。
+
+## 变砖原因
+
+在尝试刷回MIUI时：
+
+1. 使用MiFlash在Fastboot模式下不识别设备
+2. 进入TWRP刷入低版本卡刷包
+3. **忘记进行双清等操作**
+4. 导致设备变砖
+
+<Aside type="danger">
+刷机前务必备份数据，并按照正确的步骤操作，包括双清（Wipe Data/Factory Reset和Wipe Cache）。
+</Aside>
+
+## 救砖教程参考
+
+- [为了写这个教程，我特意刷坏了一部手机（手机变砖无法进入fastboot模式，9008免授权刷机） - 搞七捻三 - LINUX DO](https://linux.do/t/topic/199716)
+
+## 进入9008模式
+
+### 判断是否进入9008模式
+
+<Aside type="note">
+用下面的方法判断是否进入9008模式：
+1. 打开"此电脑" -> "管理" -> "设备管理器"
+2. 长按关机键直到设备消失
+3. 长按音量+/-以及关机键直到识别到设备
+</Aside>
+
+### 安装驱动
+
+1. 安装MiFlash驱动
+2. 连接USB后识别到9008端口
+
+## 刷机工具
+
+### 高通工具箱
+
+**问题**：进高通工具箱刷入引导失败。
+
+**解决方案**：使用低版本高通工具箱，成功。
+
+<Aside type="tip">
+如果高版本工具失败，可以尝试使用低版本工具。
+</Aside>
+
+### 刷机过程
+
+1. **刷入引导**：进高通工具箱刷入引导
+   - 看到写入的引导log里写入了660的CPU引导
+   - 尝试把636的引导名字改为660，报错
+   - 使用低版本高通工具箱，成功
+
+2. **刷XML时的问题**：
+   - 读取设备信息失败，日志提示在sahara下
+   - 每次失败都需要重新进入9008模式
+
+### MiFlash授权问题
+
+**问题**：使用MiFlash刷官方包，提示需要授权sig，但无法登录授权。
+
+**解决方案**：找免验证包
+
+- [主页 | 萤火虫资源站](https://www.yhcres.top/)
+
+### 其他工具尝试
+
+- **高通工具箱**：使用高通工具箱刷机，失败
+- **Miko工具**：可以读取设备信息，但无法刷入镜像
+- **参考教程**：[红米note5强解bl和救砖教程](https://www.coolapk.com/feed/57961121?shareKey=YjJiNmMzNTkzZmJlNjdiNDYyNjI~&shareUid=4369962&shareFrom=com.coolapk.market_14.5.3)
+
+## 成功进入Fastboot
+
+### Fastbootd问题
+
+进入Fastbootd后提示"按任意键重启"。
+
+**解决方案**：可能是USB接口版本问题
+
+1. 换一个USB 2.0电脑接口重试
+2. 不再提示退出
+
+### 重启后的问题
+
+重启后提示"加密中"，无法进入系统，但是能进入小米Recovery。
+
+### 重起Fastboot问题
+
+重起Fastboot提示"按任意键退出"。
+
+**解决方案**：换USB 2.0接口后问题解决。
+
+## 刷入TWRP
+
+### 设备识别问题
+
+刷入与启动TWRP命令失败，发现有个名为"？？？"的设备。
+
+**解决方案**：指定设备刷入
+
+```shell
+fastboot -s 设备号 boot twrp-3.7.0_9-0-whyred.img
+```
+
+### ADB设备问题
+
+打开MiFlash发现识别不到设备，桌面角标弹出安卓设备。
+
+**解决方案**：
+
+```shell
+adb kill-server
+adb start-server
+fastboot devices
+```
+
+未知设备消失且可用MiFlash刷机。
+
+## 意外情况
+
+### 误选flash&lock脚本
+
+<Aside type="caution">
+不小心选了flash&lock脚本，导致Bootloader重新上锁。
+</Aside>
+
+**解决方案**：重新解锁BL锁，然后重新刷入。
+
+## 留下的疑问
+
+以下问题需要进一步研究：
+
+1. **persist镜像作用** - 了解persist分区的作用
+2. **AB分区** - A/B分区的机制和影响
+3. **sig的计算** - 签名验证的计算方式
+4. **tee工具** - TEE（Trusted Execution Environment）相关工具
+
+## 总结
+
+Redmi Note5救砖过程需要注意：
+
+1. 正确进入9008模式
+2. 使用合适的工具版本
+3. USB接口版本可能影响刷机
+4. 注意不要误选lock脚本
+5. 遇到设备识别问题时，使用ADB命令重置
+
+通过以上步骤，成功救砖并重新刷入系统。
+

@@ -1,0 +1,217 @@
+---
+title: Astro Theme Iris：打造个人知识管理系统
+publishDate: 2026-01-02 00:00:00
+description: 'Astro Theme Iris 主题，包括强大的搜索系统、双链预览、知识图谱等功能'
+tags:
+  - Typescript
+  - Astro
+  - obsidian
+language: '中文'
+draft: false
+comment: true
+---
+
+import { Aside } from 'astro-pure/user'
+
+## 概述
+
+[Astro Theme Iris](https://github.com/LemonAdorable/astro-theme-iris) 是一个基于 [astro-theme-pure](https://github.com/cworld1/astro-theme-pure) 定制的 Astro 主题，旨在将**博客**、**简介**与**知识库**结合，打造一个功能强大的个人知识管理系统。保留了原主题的优雅设计，还加入了知识管理领域的核心功能，让内容创作和知识连接变得更加高效。
+
+<Aside type="tip">
+**示例博客**: [https://lemonadorable.github.io/](https://lemonadorable.github.io/) - 可以在这里查看主题的实际效果
+</Aside>
+
+## 核心特性
+
+### 🔍 搜索系统
+
+Iris 主题内置了基于 FlexSearch 的高性能全文搜索引擎，为内容检索提供了强大的支持。
+
+#### 主要功能
+
+- **三栏预览布局**：搜索结果、内容预览、滚动标记一体化设计，让搜索体验更加流畅
+- **多维度筛选**：支持按时间范围、标签、类型（文章/文档）进行筛选，快速定位目标内容
+- **实时高亮**：搜索结果实时高亮显示，支持滚动定位到具体位置
+
+#### 使用方法
+
+- 按 `Ctrl+K` 或 `Cmd+K` 打开搜索框
+- 输入关键词进行搜索，支持中英文混合搜索
+- 通过侧边栏筛选器缩小搜索范围
+- 点击搜索结果可跳转到对应页面
+- 右侧预览区域支持滚动标记定位
+
+<Aside type="note">
+FlexSearch 是一个高性能的全文搜索引擎，在浏览器端也能提供极快的搜索速度，无需后端支持。
+</Aside>
+
+### 🔗 双链系统（Wikilinks）
+
+Iris 主题实现了类似 Obsidian 和 Quartz 的双链功能，让知识之间的连接变得可视化。
+
+#### 核心功能
+
+- **多级预览**：使用 Tippy.js 实现类似 Quartz 的多层预览功能，悬停即可查看链接内容
+- **智能定位**：支持反向链接与反向定位引用，轻松追踪知识关联
+- **流畅交互**：支持嵌套预览，可以在预览中继续预览其他链接
+- **语法支持**：使用 `[[链接文本]]` 或 `[[链接|显示文本]]` 创建双链
+
+#### 使用示例
+
+在文章中使用双链语法：
+
+```markdown
+这是一个指向其他文章的链接：[[OpenWrt旁路由配置]]
+
+也可以自定义显示文本：[[OpenWrt旁路由配置|旁路由设置指南]]
+```
+
+鼠标悬停在双链上时，会自动显示链接内容的预览，点击预览框中的链接还可以继续跳转，实现知识网络的深度探索。
+
+<Aside type="tip">
+双链功能让知识不再是孤立的文章，而是形成了一个相互关联的知识网络，这正是现代知识管理系统的核心理念。
+</Aside>
+
+### 🗺️ 知识图谱（Graph View）
+
+知识图谱使用 D3.js 可视化页面之间的关联关系。
+
+#### 功能特点
+
+- **D3.js 有向图**：使用强大的 D3.js 库绘制有向图，清晰展示页面关联
+- **本地/全局视图**：支持查看当前页面的局部图谱或全站全局图谱
+- **节点类型区分**：区分文章、文档、标签、目录等不同类型，用不同颜色和样式表示
+- **交互式操作**：支持拖拽节点调整布局、缩放查看、点击节点跳转
+
+#### 使用场景
+
+- **探索知识网络**：通过图谱发现文章之间的隐藏关联
+- **内容规划**：查看哪些主题还没有充分展开
+- **知识发现**：发现意外的知识连接，激发新的思考
+
+<Aside type="caution">
+知识图谱功能在文章和文档页面的侧边栏显示，点击右上角按钮可切换到全站全局图谱视图。
+</Aside>
+
+### 🎨 界面优化
+
+界面优化提供一些定制化的视觉体验
+
+#### 功能特点
+
+- **全屏主页**：沉浸式首页设计与动画效果
+- **渐变背景**：文章卡片采用淡紫色渐变背景
+- **交互动画**：头像与友链的交互动画效果
+
+### 💬 评论系统
+
+Iris 主题集成了 Giscus 评论系统，基于 GitHub Discussions，无需额外配置服务器。
+
+<Aside type="note">
+Giscus 是一个基于 GitHub Discussions 的评论系统，所有评论数据都存储在 GitHub 上，安全可靠。
+</Aside>
+
+## 快速开始
+
+### 环境要求
+
+- [Node.js](https://nodejs.org/): 18.0.0+
+- [Bun](https://bun.sh/) 或 npm/pnpm/yarn
+
+### 安装步骤
+
+```bash
+# 克隆仓库
+git clone https://github.com/LemonAdorable/astro-theme-iris.git
+cd astro-theme-iris
+
+# 安装依赖
+bun install
+# 或
+npm install
+```
+
+### 开发与构建
+
+```bash
+# 启动开发服务器
+bun dev
+# 或
+npm run dev
+
+# 构建项目
+bun run build
+# 或
+npm run build
+
+# 预览构建结果
+bun preview
+# 或
+npm run preview
+```
+
+<Aside type="tip">
+开发服务器启动后，访问 `http://localhost:4321` 即可查看本地效果。修改内容后会自动热重载，搜索功能无需构建即可预览使用。
+</Aside>
+
+## 配置说明
+
+主要配置文件位于 `src/site.config.ts`，可以配置：
+
+- **站点基本信息**：标题、描述、作者等
+- **社交链接**：GitHub、Bilibili、Steam 等
+- **评论系统**：Giscus/Waline 配置
+- **其他主题选项**：菜单、页脚、内容设置等
+
+### 配置示例
+
+```typescript
+export const theme: ThemeUserConfig = {
+  title: '你的网站标题',
+  author: '你的名字',
+  description: '网站描述',
+  // ... 更多配置
+}
+```
+
+## 技术栈
+
+Iris 主题基于以下优秀的开源项目构建：
+
+- **[Astro](https://astro.build/)** - 现代化的静态网站生成框架
+- **[astro-theme-pure](https://github.com/cworld1/astro-theme-pure)** - 基础主题框架
+- **[FlexSearch](https://github.com/nextapps-de/flexsearch)** - 高性能全文搜索引擎
+- **[Tippy.js](https://atomiks.github.io/tippyjs/)** - 强大的工具提示库
+- **[D3.js](https://d3js.org/)** - 数据可视化库
+- **[Quartz](https://quartz.jzhao.xyz/)** - 知识库主题设计理念参考
+- **[Obsidian(闭源)](https://obsidian.md/)** - 双链笔记理念参考
+    
+
+## 未来规划
+
+根据 README 中的待办事项，Iris 主题还在持续改进中：
+
+- [ ] 英文或多语言支持
+- [ ] 首页简历功能
+- [ ] 打包主题以及新增的各种组件
+- [ ] 更多文档和示例
+
+<Aside type="note">
+如果你有好的建议或发现了问题，欢迎在 GitHub 上提交 Issue/Pull Request 或者联系我。
+</Aside>
+
+## 总结
+
+Astro Theme Iris 不仅仅是一个博客主题，更是一个完整的个人知识管理系统。它结合了现代博客的优雅设计和知识管理系统的强大功能，让内容创作和知识连接变得更加高效和有趣。
+
+无论是想要搭建个人博客，还是构建知识库，Iris 主题都能为你提供强大的支持。通过搜索、双链和知识图谱等功能，你的内容不再是孤立的文章，而是一个相互关联的知识网络。
+
+如果你正在寻找一个功能强大、设计优雅的 Astro 主题，不妨试试 Astro Theme Iris，它可能会成为你知识管理之旅的最佳伙伴。
+
+---
+
+**相关链接**：
+- [GitHub 仓库](https://github.com/LemonAdorable/astro-theme-iris)
+- [在线演示](https://lemonadorable.github.io/)
+- [Astro 官方文档](https://docs.astro.build/)
+

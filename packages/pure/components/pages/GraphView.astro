@@ -1,0 +1,200 @@
+---
+import { cn } from '../../utils'
+
+interface Props {
+  class?: string
+  id?: string
+  currentSlug?: string
+}
+
+const { class: className, id = 'graph-view', currentSlug, ...props } = Astro.props
+const isDocs = currentSlug?.startsWith('docs/') ?? false
+---
+
+<section
+  id={id}
+  class={cn('graph-view-container', className)}
+  data-graph-view
+  data-current-slug={currentSlug}
+  aria-labelledby={`${id}-title`}
+  {...props}
+>
+  <header class='graph-view-header'>
+    <div>
+      <span>Knowledge map</span>
+      <h2 id={`${id}-title`}>知识图谱</h2>
+      <p>{isDocs ? '当前文档、同目录指南与引用关系。' : '当前文章与分类、标签和引用关系。'}</p>
+    </div>
+    <div class='graph-view-actions'>
+      <span class='graph-view-stats' data-graph-stats>准备中</span>
+      <a
+        href={`#knowledge-graph${currentSlug ? `?focus=${encodeURIComponent(currentSlug)}` : ''}`}
+        data-graph-open
+        data-astro-prefetch='false'
+      >
+        全局图谱
+        <svg viewBox='0 0 24 24' aria-hidden='true'>
+          <path d='m9 18 6-6-6-6'></path>
+        </svg>
+      </a>
+    </div>
+  </header>
+
+  <div class='graph-canvas' data-graph-canvas>
+    <p data-graph-status>正在构建知识图谱...</p>
+  </div>
+
+  <footer class='graph-view-footer'>
+    <span>拖动节点 · 滚动缩放 · 点击打开</span>
+    <button type='button' data-graph-reset>重置视图</button>
+  </footer>
+</section>
+
+<script>
+  import { initGraphView } from './scripts/graph-view'
+
+  initGraphView()
+</script>
+
+<style>
+  .graph-view-container {
+    display: grid;
+    gap: 0.75rem;
+    min-height: 0;
+    padding: clamp(1rem, 2.5vw, 1.35rem);
+    border: 1px solid hsl(var(--border));
+    border-radius: 1.25rem;
+    background: hsl(var(--background));
+  }
+
+  .graph-view-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .graph-view-header span {
+    color: hsl(var(--primary));
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .graph-view-header h2 {
+    margin: 0.1rem 0 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .graph-view-header p {
+    margin: 0.25rem 0 0;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.72rem;
+  }
+
+  .graph-view-actions {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 0.55rem;
+  }
+
+  .graph-view-stats {
+    padding: 0.35rem 0.5rem;
+    border-radius: 0.55rem;
+    background: hsl(var(--muted) / 0.5);
+    color: hsl(var(--muted-foreground)) !important;
+    font-family: var(--font-mono);
+    font-size: 0.64rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+  }
+
+  .graph-view-actions a,
+  .graph-view-footer button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    border: 0;
+    color: hsl(var(--primary));
+    background: none;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.7rem;
+  }
+
+  .graph-view-actions a:hover,
+  .graph-view-footer button:hover {
+    text-decoration: underline;
+  }
+
+  .graph-view-actions svg {
+    width: 0.9rem;
+    height: 0.9rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+  }
+
+  .graph-canvas {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid hsl(var(--border) / 0.8);
+    border-radius: 0.95rem;
+    background:
+      radial-gradient(circle at 50% 45%, hsl(var(--primary) / 0.08), transparent 44%),
+      linear-gradient(hsl(var(--muted) / 0.2), hsl(var(--background)));
+  }
+
+  .graph-canvas {
+    height: clamp(15rem, 34vw, 19rem);
+  }
+
+  .graph-canvas > p {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    margin: 0;
+    place-items: center;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.75rem;
+  }
+
+  .graph-canvas :global(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .graph-view-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.65rem;
+  }
+
+  @media (max-width: 639px) {
+    .graph-view-header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .graph-view-actions {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .graph-view-footer {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+  }
+</style>

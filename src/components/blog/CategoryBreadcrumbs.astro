@@ -1,0 +1,52 @@
+---
+import type { CollectionEntry } from 'astro:content'
+
+import { Icon } from 'astro-pure/user'
+import { getCategoryLabel, getPostCategorySegments } from '@/utils/content-paths'
+
+interface Props {
+  post: CollectionEntry<'blog'>
+}
+
+const { post } = Astro.props
+const categories = getPostCategorySegments(post)
+---
+
+{
+  categories.length > 0 && (
+    <nav class='category-breadcrumbs' aria-label='Article category'>
+      <Icon name='package' class='size-4' />
+      <a href='/categories' data-astro-prefetch>
+        分类
+      </a>
+      {categories.map((category) => (
+        <>
+          <span aria-hidden='true'>/</span>
+          <a href={`/categories/${category.path}`} data-astro-prefetch>
+            {getCategoryLabel(category.name)}
+          </a>
+        </>
+      ))}
+    </nav>
+  )
+}
+
+<style>
+  .category-breadcrumbs {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.78rem;
+  }
+
+  .category-breadcrumbs a {
+    transition: color 150ms ease;
+  }
+
+  .category-breadcrumbs a:hover {
+    color: hsl(var(--primary));
+  }
+</style>

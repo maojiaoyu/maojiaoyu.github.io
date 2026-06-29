@@ -1,0 +1,147 @@
+---
+title: 小米CC9使用MiUnlock进入Fastboot自动关机或重启
+publishDate: "2025-02-12 22:19:29"
+description: 解决小米CC9使用MiUnlock工具进入Fastboot模式时自动关机或重启的问题
+tags:
+  - Flash
+  - Android
+  - Xiaomi
+draft: false
+comment: true
+language: 中文
+---
+
+import { Aside } from 'astro-pure/user'
+
+## 问题描述
+
+在使用MiUnlock工具尝试解锁小米CC9的Bootloader时，进入Fastboot模式后设备会自动关机或重启，导致无法正常解锁。
+
+## 解决方案
+
+### 步骤1：开发者选项配置
+
+1. 进入手机设置
+2. 打开开发者选项
+3. 绑定账号并开启USB调试
+
+### 步骤2：正确的解锁流程
+
+<Aside type="tip">
+关键是要先开机，使用MiUnlock显示"正在连接"后，再不断线重启至Fastboot模式。
+</Aside>
+
+正确的操作顺序：
+
+1. **先开机**，使用MiUnlock工具
+2. 等待显示"正在连接"
+3. 如果无法连接，**不断线**重启至Fastboot模式
+4. 此时应该可以正常解锁
+
+## 刷机资源
+
+### 官方ROM下载
+
+- [小米 9 Lite/CC9 pyxis 官方 ROM 下载 | XiaomiROM.com](https://xiaomirom.com/series/pyxis/)
+
+### TWRP Recovery
+
+- [Xiaomi Mi 9 Lite/CC9 - TWRP](https://twrp.me/xiaomi/xiaomimi9lite.html)
+- [下载适用于 pyxis 的 TWRP](https://dl.twrp.me/pyxis/)
+
+### 刷入TWRP命令
+
+```shell
+adb reboot fastboot
+fastboot flash recovery twrp-3.7.0_9-0-pyxis.img
+fastboot boot twrp.img
+```
+
+## 开发版刷机包问题
+
+### 问题
+
+找不到开发版线刷包，只能通过Recovery卡刷开发版。
+
+### 解决方案：通过系统更新界面刷入
+
+1. 在系统更新界面下载系统更新包
+2. 使用开发版本包替换 `此电脑\MI CC 9\内部存储设备\Download\downloaded_rom` 中的包
+3. 点击"重启立即更新"
+
+<Aside type="caution">
+如果失败，可能是版本太高导致的。需要下载合适版本的开发版刷机包。
+</Aside>
+
+## Fastboot与Recovery模式问题
+
+**问题**：Fastboot与Recovery模式无法连接小米助手。
+
+**解决方案**：使用ADB工具进行刷机操作。
+
+## 刷入NetHunter
+
+### 获取Kali NetHunter
+
+- [获取 Kali | Kali Linux](https://www.kali.org/get-kali/#kali-mobile)
+
+### 重要警告
+
+<Aside type="danger">
+在TWRP中删除分区时要非常小心！如果不小心删除了所有TWRP显示的分区，会导致无法使用MTP，无法用数据线导入刷机包。
+</Aside>
+
+如果不小心删除了分区：
+
+1. 回到XiaomiROM随便找个线刷包刷入重来
+2. 进入Fastboot模式
+3. 使用 `flash_all.bat` 脚本刷入
+
+### 刷入LineageOS
+
+**问题**：无法直接刷入NetHunter，显示成功但实际没有刷入。
+
+**解决方案**：
+
+1. 先刷入LineageOS相关的所有包
+   - [LineageOS Downloads](https://download.lineageos.org/devices/pyxis/builds)
+2. 参考LineageOS官方安装步骤
+   - [在 pyxis 上安装 LineageOS | LineageOS 维基](https://wiki.lineageos.org/devices/pyxis/install/variant1/#checking-the-correct-firmware)
+
+<Aside type="note">
+必须使用LineageOS官方的Recovery然后sideload，TWRP不行。具体原因需要进一步研究。
+</Aside>
+
+### 安装NetHunter
+
+成功安装LineageOS之后：
+
+1. 刷入TWRP
+2. 尝试刷入NetHunter
+3. 如果MTP开启也无法导入，使用LineageOS的Recovery进行sideload
+4. 如果sideload失败，提示要用Magisk刷入
+5. 使用同样的方式刷入Magisk
+6. 开机后从Magisk刷入NetHunter
+
+<Aside type="tip">
+更新系统后需要重刷Magisk与NetHunter。
+</Aside>
+
+## 技术细节
+
+### NetHunter运行方式
+
+从日志看，Kali在chroot容器中运行。
+
+<Aside type="note">
+不确定这个用Termux装chroot容器有没有区别，改天可以试试。
+</Aside>
+
+## 参考资源
+
+- [[redminote5nethunter|RedmiNote5刷NetHunter]] - 可以参考Redmi Note 5的刷机经验
+
+## 总结
+
+小米CC9的解锁和刷机过程需要注意操作顺序，特别是MiUnlock的使用方式。刷入NetHunter需要先安装LineageOS，然后通过Magisk安装NetHunter模块。
+

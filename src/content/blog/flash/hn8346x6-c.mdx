@@ -1,0 +1,194 @@
+---
+title: HN8346X6-C光猫探索
+publishDate: "2025-01-25 22:19:29"
+description: 华为HN8346X6-C光猫的破解、改华为界面和配置探索
+tags:
+  - Net
+  - Flash
+  - 光猫
+draft: false
+comment: true
+language: 中文
+---
+
+import { Aside } from 'astro-pure/user'
+
+## 概述
+
+HN8346X6-C是华为光猫的九洲代工低配版本，本文记录了破解、改华为界面和配置的探索过程。
+
+## 设备信息
+
+- **型号**：HN8346X6-C
+- **版本**：V5r022
+- **代工**：-C为九洲代工低配版
+
+<Aside type="note">
+8346x6-c的九州代工版本，芯片缩水，USB3.0没了，内存和flash小了一半，运营商界面不能改，只能restorehwmode使用，地区包能否补未知。
+
+截至2025/1/16，无r22版本shell补全方法。
+</Aside>
+
+## Telnet连接
+
+### 连接问题
+
+**问题**：上不了telnet。
+
+**解决方案**：
+- 禁用猫内防火墙
+- 禁用Windows防火墙
+
+### 连接命令
+
+```bash
+telnet 192.168.1.1
+```
+
+### 默认账户密码
+
+- **root** / **adminHW** 或 **Hw8@cMcc**
+
+### Shell补全失败
+
+```bash
+su
+shell
+?
+```
+
+<Aside type="caution">
+只有两条命令，未找到restorehwmode.sh与其他常用命令。
+</Aside>
+
+### 查看配置
+
+```bash
+exit
+？
+display current-configuration
+```
+
+**结果**：`password=""`，实测可telnet，但shell补全失败，无法看到密码。
+
+## 配置恢复
+
+### 忘记宽带账密
+
+<Aside type="note">
+不记得宽带固化账密，或者其他配置有误怎么办？
+
+修改配置时断开光纤，需要修复时重置光猫并连接光纤，使用tr069自动恢复设置。
+</Aside>
+
+### 配置完成后
+
+<Aside type="tip">
+配置好后呢？
+
+重置光猫并断开光纤，修改超管密码并删除tr069再连接光纤。
+</Aside>
+
+## 破解步骤
+
+### 1. 准备工作
+
+1. 拔光纤
+2. 重启光猫
+3. 打开华为ONT使能工具
+4. 刷新网卡
+5. 刷r020版本telnet shell
+
+<Aside type="caution">
+提示失败，但实际可能已经成功。
+</Aside>
+
+### 2. 重置和配置
+
+1. 重置光猫
+2. 输入超管账密：**CUAdmin**
+3. 打电话问宽带密码
+4. 删除tr069
+5. 改桥接
+
+<Aside type="note">
+暂未测量不改华为界面是否桥接限速。
+</Aside>
+
+## 参考资源
+
+### 超密获取
+
+- [华为光猫 HN8346X6 超级管理员密码获取方法，超简单_hn8346x6-c 超级密码-CSDN博客](https://blog.csdn.net/greatwjl/article/details/121904017)
+- [求华为HN8346X6获取超密方法-光猫/adsl/cable无线一体机-恩山无线论坛](https://www.right.com.cn/FORUM/thread-5490711-1-1.html)
+
+### Shell补全
+
+- [HS8546V5光猫补全Shell 切华为原厂界面-光猫/adsl/cable无线一体机-恩山无线论坛](https://www.right.com.cn/forum/thread-4060870-1-1.html)
+
+### 视频教程
+
+- [华为联通万兆光猫九州版本HN8346X6-C破解改华为公开界面_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1Hq4y1a7FM/)
+- [上海联通 HN8346X6-C 超密变静态改桥接-光猫/adsl/cable无线一体机-恩山无线论坛](https://www.right.com.cn/forum/forum.php?mod=viewthread&tid=8414061&highlight=HN8346X6-C)
+
+## 工具下载
+
+### 开启Telnet工具
+
+- [R20 开启telnet端口 工具包 都是大家最近所需的-光猫/adsl/cable无线一体机-恩山无线论坛](https://www.right.com.cn/forum/forum.php?mod=viewthread&tid=5659142&extra=page%3D1%26filter%3Dauthor%26orderby%3Ddateline)
+
+### 固件编辑工具
+
+- [csersoft/HWFW_GUI: HuaWei ONT Firmware Editor - GUI](https://github.com/csersoft/HWFW_GUI)
+- [2879597772/ONT](https://github.com/2879597772/ONT)
+- [项目首页 - 华为光猫补全Shell补全及工具集合:华为光猫补全Shell补全及工具集合 - GitCode](https://gitcode.com/open-source-toolkit/29511)
+
+## 待探索功能
+
+### 降级
+
+- [华为HN8346x6-C九州版高版本一键改华为页面通用版批量修改宁夏联通_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1bC4y1c7bt/)
+- [华为HS8545M5 V500R021 R022固件下使能、补全shell、改EPON的方法 - 宽带技术网 - Powered by Discuz!](https://www.chinadsl.net/forum.php?mod=viewthread&action=printable&tid=177760)
+
+### 自定义与刷机
+
+- [hn8346x6-c 内执行自定义脚本或者命令-光猫/adsl/cable无线一体机-恩山无线论坛](https://www.right.com.cn/FORUM/thread-8305342-1-1.html)
+- [玩机：激活华为光猫的小宇宙-openwrt『 光猫FTTx技术交流区 』 - Powered by Discuz!](https://www.chinadsl.net/thread-158737-1-1.html)
+- [烽火HG6142A联通光猫运营商定制化openwrt开启ssh及配置ipv6防火墙-光猫/adsl/cable无线一体机-恩山无线论坛](https://www.right.com.cn/forum/thread-8338118-1-1.html)
+
+### 固件备份
+
+- [华为HN8346x6-c 九洲版使用工具和shell （V5R021可用）『 各类光猫FTTx设备相关下载区 』 - Powered by Discuz!](https://www.chinadsl.net/thread-176870-1-1.html)
+
+### Shell补全
+
+- [R022 SHELL 半成品补全文件『 光猫FTTx技术交流区 』 - Powered by Discuz!](https://www.chinadsl.net/forum.php?mod=viewthread&tid=177037)
+
+### 发热问题
+
+- [破解HN8346X6-C（九州版）无root权限问题(所谓软件缩水)降低CuInform-inner高CPU-光猫/adsl/cable无线一体机-恩山无线论坛](https://www.right.com.cn/forum/thread-8272971-1-1.html)
+
+## 相关软件
+
+- [WireGuard: fast, modern, secure VPN tunnel](https://www.wireguard.com/)
+- [openwrt/openwrt: This repository is a mirror of https://git.openwrt.org/openwrt/openwrt.git](https://github.com/openwrt/openwrt)
+- [gdy666/lucky: 软硬路由公网神器,ipv6/ipv4 端口转发,反向代理,DDNS,WOL,ipv4 stun内网穿透,cron,acme,阿里云盘,ftp,webdav,filebrowser](https://github.com/gdy666/lucky)
+
+## 待研究问题
+
+1. **Full Cone NAT** - 如何配置
+2. **EPON与GPON** - 区别和配置
+3. **Dopra Linux与WAP** - 相关技术
+4. **LOID** - 光线路标识的作用
+5. **软硬旁路由** - 配置方案
+
+## 总结
+
+HN8346X6-C光猫的破解和配置需要注意：
+
+1. 九洲代工版本功能缩水
+2. R022版本目前无法完全补全shell
+3. 需要正确配置防火墙才能连接telnet
+4. 配置前要断开光纤，配置后要删除tr069
+5. 很多高级功能需要进一步探索
+

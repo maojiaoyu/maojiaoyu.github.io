@@ -1,0 +1,245 @@
+---
+title: 光猫拨号下的OpenWrt旁路由探索
+publishDate: "2025-03-08 22:19:29"
+description: 在光猫拨号环境下配置OpenWrt旁路由的完整指南，包括安装、配置和优化
+tags:
+  - Net
+  - OpenWrt
+  - 旁路由
+draft: false
+comment: true
+language: 中文
+---
+
+import { Aside } from 'astro-pure/user'
+
+## 概述
+
+由于光猫固件闭源无法刷机安装OpenWrt，而手头的路由器只有百兆网口且不能刷机，因此选择在树莓派上安装OpenWrt作为旁路由。本文记录了整个配置过程和遇到的问题。
+
+## 背景
+
+- 光猫固件闭源，不能刷机，无法安装OpenWrt
+- 路由器只有百兆网口，且不能刷机
+- 需要在树莓派上安装OpenWrt作为旁路由
+
+<Aside type="tip">
+旁路由模式可以让OpenWrt处理特定的网络功能（如代理、去广告等），而不需要替换主路由。
+</Aside>
+
+## 安装OpenWrt
+
+### 在树莓派上安装官方OpenWrt
+
+1. 下载适合树莓派的OpenWrt镜像
+2. 刷入SD卡
+3. 启动并配置
+
+### 基础配置
+
+#### 安装中文语言包
+
+```bash
+opkg install luci-i18n-base-zh-cn
+```
+
+<Aside type="tip">
+`luci-i18n-base-zh-cn` 是OpenWrt官方页面的中文语言包，安装后界面会显示中文。
+</Aside>
+
+#### 安装网页终端
+
+```bash
+opkg install ttyd
+```
+
+- **默认端口**：7681
+- 可以通过Web界面访问终端
+
+#### 安装iStore
+
+iStore是一个集成化的软件商店，方便安装和管理OpenWrt插件。
+
+- [iStore介绍 | 易有云产品中心](https://doc.linkease.com/zh/guide/istore/)
+
+## 安装OpenClash
+
+### 前置问题
+
+安装OpenClash时可能遇到前置依赖失败的问题。
+
+**解决方案**：
+
+```bash
+opkg remove dnsmasq && opkg install dnsmasq-full
+```
+
+<Aside type="caution">
+dnsmasq和dnsmasq-full版本不能同时存在，安装和卸载必须同时进行。`opkg`是OpenWrt的包管理器。
+</Aside>
+
+参考资源：
+- [无法安装问题 · Issue #923 · vernesong/OpenClash](https://github.com/vernesong/OpenClash/issues/923)
+- [OpenWrt安装OpenClash - Forever Young](https://www.luxiyue.com/openwrt/openwrt%e5%ae%89%e8%a3%85openclash/)
+
+### 防火墙说明
+
+<Aside type="note">
+- 旧版本基于iptables的Firewall3防火墙
+- 新版本基于nftables的Firewall4防火墙
+
+只需要安装Firewall4即可。
+</Aside>
+
+## 常见问题
+
+### DNS冲突
+
+**问题**：SmartDNS与dnsmasq冲突。
+
+**解决方案**：禁用本地DNS劫持。
+
+### 无线功能丢失
+
+**问题**：不知道为什么无线功能整没了。
+
+**可能原因**：
+- 插件装太多
+- 超过设定的2G分区大小
+
+<Aside type="caution">
+下次记得备份固件，以便出现问题可以快速恢复。
+</Aside>
+
+**解决方案**：
+- [解决openwrt系统设备未激活，无线用不了的情况](https://blog.csdn.net/u010560236/article/details/136715420)
+
+### 网络完全无法使用
+
+如果连有线也打不开了，只能通过PINN引导重新修复。
+
+## 集成化固件
+
+发现两个集成化固件：
+
+1. **[恩山论坛OpenWrt固件](https://www.right.com.cn/forum/thread-4387071-1-3.html)** - 包含ipv6/docker/大全版/极致版/旁路由/应用商店/养老版
+2. **[iStoreOS](https://site.istoreos.com/)** - 易有云网络科技开发的路由存储系统
+3. **[ImmortalWrt固件选择器](https://firmware-selector.immortalwrt.org/)** - 在线选择适合的固件
+
+<Aside type="tip">
+iStoreOS默认账户密码：`root` / `password`
+</Aside>
+
+## 旁路由配置
+
+### 基本配置
+
+由于没有千兆路由器，只能使用光猫拨号，然后关闭光猫的所有DHCP服务。
+
+**配置要点**：
+- 关闭光猫的DHCP服务
+- 在OpenWrt上配置DHCP服务
+- 配置NAT模式（目前使用restricted cone，后续需要full cone再调整）
+
+### 网络不稳定问题
+
+**问题**：配置后总是时不时断掉一会，还有DNS泄露。
+
+**解决方案**：
+- 配置旁路由时，需要运营商的DNS时全部填主路由地址
+- 参考OpenClash配置教程
+
+## OpenClash配置
+
+### 基本配置
+
+- [1分钟完美配置 OpenClash 旁路由](https://www.youtube.com/watch?v=0vVJYvV-nwE) - 无DNS污染，无DNS泄露，自动选择、负载均衡
+
+### IPv6配置
+
+- [硬路由 + 旁路由OpenWrt + OpenClash + IPv6 完美配置](https://www.youtube.com/watch?v=gBSVl_BqptQ) - 无DNS污染，无DNS泄露，人人都有公网IP
+
+### 主路由配置
+
+- [OpenClash 设置方案](https://github.com/Aethersailor/Custom_OpenClash_Rules/wiki/OpenClash-%E8%AE%BE%E7%BD%AE%E6%96%B9%E6%A1%88#%E7%A1%AE%E4%BF%9D-openwrt-%E5%8F%AF%E4%BB%A5%E6%AD%A3%E5%B8%B8%E8%AE%BF%E9%97%AE-github)
+
+### Docker部署订阅转换
+
+```bash
+docker run --name=SubConverter -d --restart=always -p 25500:25500 asdlokj1qpi23/subconverter:latest
+```
+
+**测试地址**：`http://192.168.1.100:25500/sub`
+
+- [1分钟完美配置 openClash 主路由](https://www.youtube.com/watch?v=Hm47TyJqVdc) - 解决订阅模板失败，Docker部署订阅转换服务器
+
+## 网络检测工具
+
+### DNS泄露检测
+
+- [DNS Leak Test - BrowserLeaks](https://browserleaks.com/dns)
+- [IP/DNS Detect](https://ipleak.net/) - 检测IP、DNS和发送给网站的信息
+
+### IPv6测试
+
+- ipw.cn
+- test-ipv6.com
+- nj-uss-ipv6.vultr.com
+- ipaddress.com/dns-lookup - 粘贴上面没有A记录
+
+### 代理检测
+
+- [代理/VPN 检测](https://proxy.888005.xyz/)
+- [Live Proxy/VPN Detection](https://proxy.incolumitas.com/proxy_detect.html)
+- [代理检测方法盘点](https://www.youtube.com/watch?v=_EoccSHSiAU) - 解决各种代理检测手段
+
+## 高级配置
+
+### DMZ配置
+
+**问题**：光猫设置路由器DMZ后，整个网络的所有设备全部开启了DMZ。
+
+**解决方案**：
+- 关闭路由器DMZ
+- 光猫为特定设备设置IPv4与IPv6虚拟服务器作为DMZ
+
+### 内网网址设置
+
+为服务设置特定的内网网址，可以使用dnsmasq进行配置。
+
+### 优化排错维护
+
+- [OpenClash 终极优化](https://www.youtube.com/watch?v=QxOLvyCdVLU) - 订阅转换100%成功，Google Play正常下载，排错、域名维护
+
+### 固件依赖问题
+
+- [固件缺少依赖的软件包 libopenssl3](https://github.com/istoreos/istoreos/issues/1057) - 导致很多插件无法安装
+
+### IPv6下Lucky配置
+
+- [30分钟精通 IPv6 下 Lucky 完美配置](https://www.youtube.com/watch?v=85TNLGVoJEA) - 公网域名DDNS + SSL + Https + 端口转发
+
+### 双AdGuard Home
+
+- [从0开始，旁路由 OpenClash + 双 AdGuard Home 教程](https://www.youtube.com/watch?v=0kCSJL_lSyw) - 手把手喂饭教程
+
+### DNS主机名映射
+
+使用 whatmydns.me 进行DNS主机名映射测试。
+
+## 备份与维护
+
+### 备份iStore配置
+
+建议在修改配置前先备份，之后的一切修改都在沙箱、istoredup、docker中进行测试，没问题再迁移到生产环境。
+
+## 参考资源
+
+### 旁路由教程
+
+- [三分钟搞定OpenWrt网关(旁路由)模式设置](https://www.right.com.cn/FORUM/thread-4181997-1-1.html) - 小白必备教程，适用于N1及所有旁路由设备
+
+## 总结
+
+在光猫拨号环境下配置OpenWrt旁路由需要特别注意DNS配置、网络稳定性和IPv6支持。通过合理的配置和优化，可以实现无DNS污染、无DNS泄露的完美网络环境。
+
