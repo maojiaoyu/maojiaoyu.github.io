@@ -2,6 +2,9 @@
 
 [English](./README.md) | 简体中文
 
+> [!CAUTION]
+> 这个项目正在快速迭代，自动合并可能会覆盖你本地的定制内容。更新时请不要直接使用 `git pull`，而是先执行 `git fetch`，再通过 `git merge --no-commit` 手动检查并控制合并结果。
+
 <div align="center">
   <img src="./logo.png" alt="Astro Theme Iris Logo" width="200">
 </div>
@@ -10,10 +13,10 @@
 
 ## 📸 展示图
 
-**示例博客**: [https://lemonadorable.github.io/](https://lemonadorable.github.io/)
+**示例博客**: [https://maojiaoyu.github.io/](https://maojiaoyu.github.io/)
 
 > [!NOTE]
-> 已知问题：Head 标签和自定义选项仍在开发中（已暴露模板用于修改）
+> 已知问题：Header 与自定义选项仍在开发中，模板目前已暴露可供修改。
 
 <div align="center">
   <img src="./index.png" alt="首页展示" width="100%">
@@ -69,9 +72,9 @@
 
 - **Giscus 集成**：基于 GitHub Discussions 的评论系统
 
-#### 📊 Mermaid Integration
+#### 📊 Mermaid 集成
 
-- **Mermaid Integration**: Mermaid integration for diagramming
+- **Mermaid 支持**：用于绘制流程图和结构图
 
 #### 🖋️ Typst 排版系统
 
@@ -79,9 +82,9 @@
 
 ### 🚀 快速开始
 
-#### 选项 1: 作为模板使用 (推荐)
+#### 选项 1：作为模板使用（推荐）
 
-1. 点击本仓库顶部的 **"Use this template"** 按钮。
+1. 点击本仓库顶部的 **Use this template** 按钮。
 2. 将新仓库克隆到本地。
 3. 安装依赖并开始开发：
    ```shell
@@ -89,7 +92,7 @@
    bun dev     # 或 npm run dev
    ```
 
-#### 选项 2: 手动安装
+#### 选项 2：手动安装
 
 ```shell
 # 克隆仓库
@@ -105,15 +108,16 @@ bun install # 或 npm install
 要获取 Iris 主题的最新功能和修复：
 
 ```shell
-# 添加上游仓库 (只需执行一次)
+# 添加上游仓库（只需执行一次）
 git remote add upstream https://github.com/LemonAdorable/astro-theme-iris.git
 
-# 获取并合并 main 分支的更新
+# 获取并合并 main 分支更新
 git fetch upstream main
 git merge upstream/main --allow-unrelated-histories
 ```
+
 > [!TIP]
-> `--allow-unrelated-histories` 参数仅在第一次合并（当历史记录不相关时）需要。后续更新只需执行普通的 `git pull upstream main` 即可。
+> `--allow-unrelated-histories` 仅在第一次合并且历史记录不相关时需要。后续更新可以直接使用 `git pull upstream main`。
 
 ### 📝 待办事项
 
@@ -125,11 +129,11 @@ git merge upstream/main --allow-unrelated-histories
 ### 📚 仓库结构
 
 ```
-Iris 主题 (LemonAdorable/astro-theme-iris)
-  └── main 分支 (上游)
+Iris Theme (LemonAdorable/astro-theme-iris)
+  └── main branch (Upstream)
       ↓ (fetch & merge)
-你的博客仓库
-  └── main 分支 (你的内容 + Iris 组件)
+Your Blog Repository
+  └── main branch (Your content + Iris components)
 ```
 
 ### 🙏 致谢
@@ -145,7 +149,7 @@ Iris 主题 (LemonAdorable/astro-theme-iris)
 
 ### 📞 联系方式
 
-如有问题或建议，欢迎发邮件联系
+如有问题或建议，欢迎通过邮件联系。
 
 ### 📋 使用说明
 
@@ -179,6 +183,21 @@ Iris 主题 (LemonAdorable/astro-theme-iris)
 - 社交链接
 - 评论系统（Giscus/Waline）
 - 其他主题选项
+
+#### 本地字体
+
+当前项目已改为使用仓库内的本地字体文件，而不是远程 Google Fonts。
+
+- 字体文件位于 `public/fonts/noto-sans/`
+- 字体注册规则定义在 `src/assets/styles/global.css`
+- 全局字体变量应用在 `src/components/BaseHead.astro`
+
+如果想切换为其他本地字体：
+
+1. 将 `.ttf` 或 `.otf` 字体文件放入 `public/fonts/`
+2. 在 `src/assets/styles/global.css` 中添加 `@font-face` 规则
+3. 更新 `--font-satoshi` 变量指向新的字体族
+4. 重新构建站点：`bun run build`
 
 ### 📄 许可证
 

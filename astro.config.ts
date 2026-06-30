@@ -30,7 +30,7 @@ export default defineConfig({
   compressHTML: true,
 
   // [Basic]
-  site: 'https://lemonadorable.github.io',
+  site: 'https://maojiaoyu.github.io',
   // Deploy to a sub path
   // https://astro-pure.js.org/docs/setup/deployment#platform-with-base-path
   // base: '/astro-pure/',
@@ -61,21 +61,23 @@ export default defineConfig({
   },
   // Enable font preloading and optimization
   // https://docs.astro.build/en/guides/fonts/
-  fonts: [
-    {
-      provider: fontProviders.google(),
-      name: 'Satoshi',
-      cssVariable: '--font-satoshi',
-      // Default included:
-      // weights: [400],
-      // styles: ["normal", "italics"],
-      // subsets: ["cyrillic-ext", "cyrillic", "greek-ext", "greek", "vietnamese", "latin-ext", "latin"],
-      // fallbacks: ["sans-serif"],
-      styles: ['normal', 'italic'],
-      weights: [400, 500],
-      subsets: ['latin']
-    }
-  ],
+  
+  // 修改为本地字体，注释掉字体源
+  // fonts: [
+  //   {
+  //     provider: fontProviders.google(),
+  //     name: 'Satoshi',
+  //     cssVariable: '--font-satoshi',
+  //     // Default included:
+  //     // weights: [400],
+  //     // styles: ["normal", "italics"],
+  //     // subsets: ["cyrillic-ext", "cyrillic", "greek-ext", "greek", "vietnamese", "latin-ext", "latin"],
+  //     // fallbacks: ["sans-serif"],
+  //     styles: ['normal', 'italic'],
+  //     weights: [400, 500],
+  //     subsets: ['latin']
+  //   }
+  // ],
 
   // [Markdown]
   markdown: {

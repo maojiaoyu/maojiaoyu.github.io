@@ -1,9 +1,9 @@
 # Astro Theme Iris
 
-English | [简体中文](./README-zh-CN.md)
+简体中文
 
 > [!CAUTION]
-> This project is undergoing frequent changes, and automatic merging may overwrite your local customizations. When pulling updates, please do not use `git pull` directly. Instead, use `git fetch` + `git merge --no-commit` to manually review and control the merge results.
+> 这个项目正在快速迭代，自动合并可能会覆盖你本地的定制内容。更新时请不要直接使用 `git pull`，而是先执行 `git fetch`，再通过 `git merge --no-commit` 手动检查并控制合并结果。
 
 <div align="center">
   <img src="./logo.png" alt="Astro Theme Iris Logo" width="200">
@@ -11,121 +11,122 @@ English | [简体中文](./README-zh-CN.md)
 
 ---
 
-## 📸 Screenshots
+## 📸 展示图
 
-**Demo Blog**: [https://lemonadorable.github.io/](https://lemonadorable.github.io/)
+**示例博客**: [https://maojiaoyu.github.io/](https://maojiaoyu.github.io/)
 
 > [!NOTE]
-> Known issues: Header & customize options is still under development (template exposed still).
+> 已知问题：Header 与自定义选项仍在开发中，模板目前已暴露可供修改。
 
 <div align="center">
-  <img src="./index.png" alt="Homepage Showcase" width="100%">
-  <p><em>Full-screen homepage with animation effects</em></p>
+  <img src="./index.png" alt="首页展示" width="100%">
+  <p><em>首页全屏展示与动画效果</em></p>
 </div>
 
 <div align="center">
-  <img src="./search.png" alt="Search Feature Showcase" width="100%">
-  <p><em>Powerful search preview system - supports category filtering, real-time preview, and scroll markers</em></p>
+  <img src="./search.png" alt="搜索功能展示" width="100%">
+  <p><em>强大的搜索预览系统 - 支持分类筛选、实时预览、滚动标记</em></p>
 </div>
 
 <div align="center">
-  <img src="./function.png" alt="Feature Showcase" width="100%">
-  <p><em>Wikilink preview, Graph View, and knowledge graph</em></p>
+  <img src="./function.png" alt="功能展示" width="100%">
+  <p><em>双链预览、Graph View 与知识图谱</em></p>
 </div>
 
 ---
 
-## 🎨 About Iris Theme
+## 🎨 Iris 紫鸢模板说明
 
-This project is customized based on [astro-theme-pure](https://github.com/cworld1/astro-theme-pure), aiming to combine **blog**, **profile**, and **knowledge base** to create a powerful personal knowledge management system.
+本项目基于 [astro-theme-pure](https://github.com/cworld1/astro-theme-pure) 进行了定制，旨在将**博客**、**简介**与**知识库**结合，打造一个功能强大的个人知识管理系统。
 
-### ✨ Core Features
+### ✨ 核心特性
 
-#### 🔍 Powerful Search System
+#### 🔍 强大的搜索系统
 
-- **FlexSearch Full-Text Search**: High-performance search supporting multiple languages including Chinese and English
-- **Three-Column Preview Layout**: Integrated search results, content preview, and scroll markers
-- **Multi-Dimensional Filtering**: Filter by date range, tags, and type (article/docs)
-- **Real-Time Highlighting**: Real-time search result highlighting with scroll positioning
+- **FlexSearch 全文搜索**：支持中文、英文等多种语言的高性能搜索
+- **三栏预览布局**：搜索结果、内容预览、滚动标记一体化
+- **多维度筛选**：支持按时间范围、标签、类型（文章/文档）筛选
+- **实时高亮**：搜索结果实时高亮，支持滚动定位
 
-#### 🔗 Wikilink System
+#### 🔗 双链系统（Wikilinks）
 
-- **Multi-Level Preview**: Uses Tippy.js to implement Quartz-like multi-layer preview functionality
-- **Smart Positioning**: Supports backlinks and reverse positioning references
-- **Smooth Interaction**: Supports nested previews
+- **多级预览**：使用 Tippy.js 实现类似 Quartz 的多层预览功能
+- **智能定位**：支持反向链接与反向定位引用
+- **流畅交互**：支持嵌套预览
 
-#### 🗺️ Knowledge Graph (Graph View)
+#### 🗺️ 知识图谱（Graph View）
 
-- **D3.js Directed Graph**: Visualizes relationships between pages
-- **Local/Global Views**: View local graph for current page or site-wide global graph
-- **Node Types**: Distinguishes between articles, docs, tags, categories, and other types
-- **Interactive Operations**: Supports drag, zoom, and click navigation
+- **D3.js 有向图**：可视化页面之间的关联关系
+- **本地/全局视图**：支持查看当前页面的局部图谱或全站全局图谱
+- **节点类型**：区分文章、文档、标签、目录等不同类型
+- **交互式操作**：支持拖拽、缩放、点击跳转
 
-#### 🎨 UI Optimization
+#### 🎨 界面优化
 
-- **Full-Screen Homepage**: Immersive homepage design with animation effects
-- **Gradient Background**: Article cards use light purple gradient backgrounds
-- **Interactive Animations**: Interactive animation effects for avatars and friend links
-- **Responsive Design**: Adapted for desktop and mobile devices
+- **全屏主页**：沉浸式首页设计，支持动画效果
+- **渐变背景**：文章卡片采用淡紫色渐变背景
+- **交互动画**：头像与友链的交互动画效果
+- **响应式设计**：适配桌面端和移动端
 
-#### 💬 Comment System
+#### 💬 评论系统
 
-- **Giscus Integration**: Comment system based on GitHub Discussions
+- **Giscus 集成**：基于 GitHub Discussions 的评论系统
 
-#### 📊 Mermaid Integration
+#### 📊 Mermaid 集成
 
-- **Mermaid Integration**: Mermaid integration for diagramming
+- **Mermaid 支持**：用于绘制流程图和结构图
 
-#### 🖋️ Typst Integration
+#### 🖋️ Typst 排版系统
 
-- **Typst Support**: Typst integration for high-quality mathematical equations and diagrams rendering in MDX
+- **Typst 支持**：支持在 MDX 中原生渲染高质量的数学公式、矢量图表与学术排版
 
-### 🚀 Quick Start
+### 🚀 快速开始
 
-#### Option 1: Use as a Template (Recommended)
+#### 选项 1：作为模板使用（推荐）
 
-1. Click the **"Use this template"** button at the top of this repository.
-2. Clone your new repository to local.
-3. Install dependencies and start developing:
+1. 点击本仓库顶部的 **Use this template** 按钮。
+2. 将新仓库克隆到本地。
+3. 安装依赖并开始开发：
    ```shell
-   bun install # or npm install
-   bun dev     # or npm run dev
+   bun install # 或 npm install
+   bun dev     # 或 npm run dev
    ```
 
-#### Option 2: Manual Installation
+#### 选项 2：手动安装
 
 ```shell
-# Clone repository
+# 克隆仓库
 git clone https://github.com/LemonAdorable/astro-theme-iris.git
 cd astro-theme-iris
 
-# Install dependencies
-bun install # or npm install
+# 安装依赖
+bun install # 或 npm install
 ```
 
-### 🔄 Updating Theme
+### 🔄 更新主题
 
-To get the latest features and fixes from the Iris theme:
+要获取 Iris 主题的最新功能和修复：
 
 ```shell
-# Add upstream remote (only need to do once)
+# 添加上游仓库（只需执行一次）
 git remote add upstream https://github.com/LemonAdorable/astro-theme-iris.git
 
-# Pull and merge updates from main branch
+# 获取并合并 main 分支更新
 git fetch upstream main
 git merge upstream/main --allow-unrelated-histories
 ```
+
 > [!TIP]
-> The `--allow-unrelated-histories` flag is only required for the first merge if you have an existing repository with a different history. For future updates, a simple `git pull upstream main` will work.
+> `--allow-unrelated-histories` 仅在第一次合并且历史记录不相关时需要。后续更新可以直接使用 `git pull upstream main`。
 
-### 📝 Todo
+### 📝 待办事项
 
-- [ ] English or multi-language support
-- [ ] Homepage resume feature
-- [ ] Package theme and new components
-- [ ] More documentation and examples
+- [ ] 英文或多语言支持
+- [ ] 首页简历功能
+- [ ] 打包主题以及新增的各种组件
+- [ ] 更多文档和示例
 
-### 📚 Repository Structure
+### 📚 仓库结构
 
 ```
 Iris Theme (LemonAdorable/astro-theme-iris)
@@ -135,57 +136,72 @@ Your Blog Repository
   └── main branch (Your content + Iris components)
 ```
 
-### 🙏 Acknowledgments
+### 🙏 致谢
 
-This project is based on the following excellent open-source projects:
+本项目基于以下优秀的开源项目：
 
-- **[astro-theme-pure](https://github.com/cworld1/astro-theme-pure)** - Base theme framework
-- **[FlexSearch](https://github.com/nextapps-de/flexsearch)** - High-performance full-text search engine
-- **[Tippy.js](https://atomiks.github.io/tippyjs/)** - Powerful tooltip library
-- **[D3.js](https://d3js.org/)** - Data visualization library
-- **[Quartz](https://quartz.jzhao.xyz/)** - Knowledge base theme design concept reference
-- **[Obsidian](https://obsidian.md/)** - Wikilink note concept reference
+- **[astro-theme-pure](https://github.com/cworld1/astro-theme-pure)** - 基础主题框架
+- **[FlexSearch](https://github.com/nextapps-de/flexsearch)** - 高性能全文搜索引擎
+- **[Tippy.js](https://atomiks.github.io/tippyjs/)** - 强大的工具提示库
+- **[D3.js](https://d3js.org/)** - 数据可视化库
+- **[Quartz](https://quartz.jzhao.xyz/)** - 知识库主题设计理念参考
+- **[Obsidian](https://obsidian.md/)** - 双链笔记理念参考
 
-### 📞 Contact
+### 📞 联系方式
 
-For questions or suggestions, please feel free to contact via email
+如有问题或建议，欢迎通过邮件联系。
 
-### 📋 Usage Instructions
+### 📋 使用说明
 
-#### Search Feature
+#### 搜索功能
 
-- Press `Ctrl+K` or `Cmd+K` to open the search box
-- Supports Chinese and English full-text search
-- Filter by date range, tags, and type
-- Click search results to navigate to corresponding pages
-- Right preview area supports scroll marker positioning
+- 按 `Ctrl+K` 或 `Cmd+K` 打开搜索框
+- 支持中文、英文全文搜索
+- 可通过时间范围、标签、类型进行筛选
+- 点击搜索结果可跳转到对应页面
+- 右侧预览区域支持滚动标记定位
 
-#### Wikilink Preview
+#### 双链预览
 
-- Use `[[link text]]` or `[[link|display text]]` in articles to create wikilinks
-- Hover over wikilinks to preview link content
-- Supports multi-level nested previews
-- Preview box supports interaction, click links to navigate
+- 在文章中使用 `[[链接文本]]` 或 `[[链接|显示文本]]` 创建双链
+- 鼠标悬停在双链上可预览链接内容
+- 支持多层嵌套预览
+- 预览框支持交互，可点击链接跳转
 
-#### Knowledge Graph
+#### 知识图谱
 
-- Graph View displayed in sidebar on article and doc pages
-- Click nodes to navigate to corresponding pages
-- Supports dragging nodes to adjust layout
-- Click top-right button to view site-wide global graph
+- 文章和文档页面侧边栏显示 Graph View
+- 点击节点可跳转到对应页面
+- 支持拖拽节点调整布局
+- 点击右上角按钮可查看全站全局图谱
 
-### ⚙️ Configuration
+### ⚙️ 配置说明
 
-Main configuration file is located at `src/site.config.ts`, where you can configure:
+主要配置文件位于 `src/site.config.ts`，可以配置：
 
-- Basic site information (title, description, author, etc.)
-- Social links
-- Comment system (Giscus/Waline)
-- Other theme options
+- 站点基本信息（标题、描述、作者等）
+- 社交链接
+- 评论系统（Giscus/Waline）
+- 其他主题选项
 
-### 📄 License
+#### 本地字体
 
-This project is open source under the [Apache 2.0 License](https://github.com/LemonAdorable/astro-theme-iris/main/LICENSE).
+当前项目已改为使用仓库内的本地字体文件，而不是远程 Google Fonts。
+
+- 字体文件位于 `public/fonts/noto-sans/`
+- 字体注册规则定义在 `src/assets/styles/global.css`
+- 全局字体变量应用在 `src/components/BaseHead.astro`
+
+如果想切换为其他本地字体：
+
+1. 将 `.ttf` 或 `.otf` 字体文件放入 `public/fonts/`
+2. 在 `src/assets/styles/global.css` 中添加 `@font-face` 规则
+3. 更新 `--font-satoshi` 变量指向新的字体族
+4. 重新构建站点：`bun run build`
+
+### 📄 许可证
+
+本项目基于 [Apache 2.0 许可证](https://github.com/LemonAdorable/astro-theme-iris/main/LICENSE) 开源。
 
 ### ⭐ Star History
 

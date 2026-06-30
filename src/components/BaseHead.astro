@@ -1,5 +1,4 @@
 ---
-import { Font } from 'astro:assets'
 import config from 'virtual:config'
 
 import { prod } from 'astro-pure/server'
@@ -31,7 +30,8 @@ const socialImageURL = new URL(ogImage ? ogImage : config.socialCard, Astro.url)
 <link rel='icon' type='image/gif' href='/favicon/favicon.gif' />
 
 {/* Font preloads */}
-<Font cssVariable='--font-satoshi' preload={[{ subset: 'latin', style: 'normal' }]} />
+<link rel='preload' href='/fonts/noto-sans/NotoSans-Regular.ttf' as='font' type='font/ttf' crossorigin />
+<link rel='preload' href='/fonts/noto-sans/NotoSans-Bold.ttf' as='font' type='font/ttf' crossorigin />
 <style>
   body {
     font-family: var(--font-satoshi);
