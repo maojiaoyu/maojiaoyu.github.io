@@ -1,32 +1,34 @@
 ---
+import config from 'virtual:config'
+
 interface Props {
   class?: string
 }
 
 const { class: className } = Astro.props
+
+const giscusConfig = {
+  repo: config.integ.giscus?.repo || 'LemonAdorable/lemonadorable.github.io',
+  repoId: config.integ.giscus?.repoId || 'R_kgDOLJXF6A',
+  category: config.integ.giscus?.category || 'Announcements',
+  categoryId: config.integ.giscus?.categoryId || 'DIC_kwDOLJXF6M4Ccs4x',
+  mapping: 'pathname',
+  strict: '0',
+  reactionsEnabled: '1',
+  emitMetadata: '1',
+  inputPosition: 'top',
+  lang: 'zh-CN',
+  loading: 'eager',
+  crossorigin: 'anonymous'
+}
 ---
 
 <div id='giscus' class={className}>
   <p class='giscus-loading'>评论正在预加载...</p>
 </div>
 
-<script>
+<script define:vars={{ giscusConfig }}>
   let themeListenerReady = false
-
-  const giscusConfig = {
-    repo: 'LemonAdorable/lemonadorable.github.io',
-    repoId: 'R_kgDOLJXF6A',
-    category: 'Announcements',
-    categoryId: 'DIC_kwDOLJXF6M4Ccs4x',
-    mapping: 'pathname',
-    strict: '0',
-    reactionsEnabled: '1',
-    emitMetadata: '1',
-    inputPosition: 'top',
-    lang: 'zh-CN',
-    loading: 'eager',
-    crossorigin: 'anonymous'
-  }
 
   function getTheme() {
     const isDark = document.documentElement.classList.contains('dark')
