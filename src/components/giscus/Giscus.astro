@@ -8,10 +8,10 @@ interface Props {
 const { class: className } = Astro.props
 
 const giscusConfig = {
-  repo: config.integ.giscus?.repo || 'LemonAdorable/lemonadorable.github.io',
-  repoId: config.integ.giscus?.repoId || 'R_kgDOLJXF6A',
+  repo: config.integ.giscus?.repo || 'maojiaoyu/maojiaoyu.github.io',
+  repoId: config.integ.giscus?.repoId || 'R_kgDOTIZH_g',
   category: config.integ.giscus?.category || 'Announcements',
-  categoryId: config.integ.giscus?.categoryId || 'DIC_kwDOLJXF6M4Ccs4x',
+  categoryId: config.integ.giscus?.categoryId || 'DIC_kwDOTIZH_s4DAVQ-',
   mapping: 'pathname',
   strict: '0',
   reactionsEnabled: '1',
@@ -37,13 +37,13 @@ const giscusConfig = {
 
   function updateGiscusTheme() {
     const theme = getTheme()
-    const iframe = document.querySelector('iframe.giscus-frame') as HTMLIFrameElement | null
+    const iframe = document.querySelector('iframe.giscus-frame')
     if (iframe && iframe.contentWindow) {
       iframe.contentWindow.postMessage({ giscus: { setConfig: { theme } } }, 'https://giscus.app')
     }
   }
 
-  function loadGiscus(container: HTMLElement) {
+  function loadGiscus(container) {
     if (!container.isConnected || container.dataset.giscusLoaded === 'true') return
     container.dataset.giscusLoaded = 'true'
 
@@ -72,6 +72,11 @@ const giscusConfig = {
     if (!container || container.dataset.giscusObserved === 'true') return
     container.dataset.giscusObserved = 'true'
 
+    if (typeof IntersectionObserver === 'undefined') {
+      loadGiscus(container)
+      return
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (!entries.some((entry) => entry.isIntersecting)) return
@@ -86,16 +91,13 @@ const giscusConfig = {
       observer.disconnect()
       loadGiscus(container)
     }
-    const idleWindow = window as Window & {
-      requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number
-    }
+    const idleWindow = window
     if (idleWindow.requestIdleCallback) {
       idleWindow.requestIdleCallback(idleLoad, { timeout: 4000 })
     } else {
       window.setTimeout(idleLoad, 2500)
     }
 
-    // Short pages can reach the comments before the observer's first callback.
     if (container.getBoundingClientRect().top < window.innerHeight + 1800) {
       observer.disconnect()
       loadGiscus(container)
