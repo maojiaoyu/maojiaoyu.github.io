@@ -1,6 +1,6 @@
-# Astro Theme Iris
+# Astro Theme maojiaoyu
 
-简体中文
+[English](./README.md) | 简体中文
 
 > [!CAUTION]
 > 这个项目正在快速迭代，自动合并可能会覆盖你本地的定制内容。更新时请不要直接使用 `git pull`，而是先执行 `git fetch`，再通过 `git merge --no-commit` 手动检查并控制合并结果。
@@ -11,11 +11,11 @@
 
 ---
 
-## 📸 展示图
+## 展示图
 
-**示例博客**: [https://maojiaoyu.github.io/](https://maojiaoyu.github.io/)
+**示例博客**: [https://maojiaoyu.com/](https://maojiaoyu.com/)
 
-> [!NOTE]
+<!-- > [!NOTE]
 > 已知问题：Header 与自定义选项仍在开发中，模板目前已暴露可供修改。
 
 <div align="center">
@@ -31,15 +31,15 @@
 <div align="center">
   <img src="./function.png" alt="功能展示" width="100%">
   <p><em>双链预览、Graph View 与知识图谱</em></p>
-</div>
+</div> -->
 
 ---
 
-## 🎨 Iris 紫鸢模板说明
+## 猫角域模板说明
 
-本项目基于 [astro-theme-pure](https://github.com/cworld1/astro-theme-pure) 进行了定制，旨在将**博客**、**简介**与**知识库**结合，打造一个功能强大的个人知识管理系统。
+- 本项目基于 [astro-theme-iris](https://github.com/LemonAdorable/astro-theme-iris) 进行了定制，具备原博主理念：**博客**、**简介**与**知识库**结合，打造一个功能强大的个人知识管理系统。
 
-### ✨ 核心特性
+### 核心特性
 
 #### 🔍 强大的搜索系统
 
@@ -48,43 +48,43 @@
 - **多维度筛选**：支持按时间范围、标签、类型（文章/文档）筛选
 - **实时高亮**：搜索结果实时高亮，支持滚动定位
 
-#### 🔗 双链系统（Wikilinks）
+#### 双链系统（Wikilinks）
 
 - **多级预览**：使用 Tippy.js 实现类似 Quartz 的多层预览功能
 - **智能定位**：支持反向链接与反向定位引用
 - **流畅交互**：支持嵌套预览
 
-#### 🗺️ 知识图谱（Graph View）
+#### 知识图谱（Graph View）
 
 - **D3.js 有向图**：可视化页面之间的关联关系
 - **本地/全局视图**：支持查看当前页面的局部图谱或全站全局图谱
 - **节点类型**：区分文章、文档、标签、目录等不同类型
 - **交互式操作**：支持拖拽、缩放、点击跳转
 
-#### 🎨 界面优化
+#### 界面优化
 
 - **全屏主页**：沉浸式首页设计，支持动画效果
 - **渐变背景**：文章卡片采用淡紫色渐变背景
 - **交互动画**：头像与友链的交互动画效果
 - **响应式设计**：适配桌面端和移动端
 
-#### 💬 评论系统
+#### 评论系统
 
 - **Giscus 集成**：基于 GitHub Discussions 的评论系统
 
-#### 📊 Mermaid 集成
+#### Mermaid 集成
 
 - **Mermaid 支持**：用于绘制流程图和结构图
 
-#### 🖋️ Typst 排版系统
+#### Typst 排版系统
 
 - **Typst 支持**：支持在 MDX 中原生渲染高质量的数学公式、矢量图表与学术排版
 
-### 🚀 快速开始
+### 快速开始
 
 #### 选项 1：作为模板使用（推荐）
 
-1. 点击本仓库顶部的 **Use this template** 按钮。
+1. 直接fork本仓库。
 2. 将新仓库克隆到本地。
 3. 安装依赖并开始开发：
    ```shell
@@ -96,8 +96,8 @@
 
 ```shell
 # 克隆仓库
-git clone https://github.com/LemonAdorable/astro-theme-iris.git
-cd astro-theme-iris
+git clone https://github.com/maojiaoyu/maojiaoyu.github.io.git
+cd maojiaoyu.github.io 
 
 # 安装依赖
 bun install # 或 npm install
@@ -105,15 +105,16 @@ bun install # 或 npm install
 
 ### 🔄 更新主题
 
-要获取 Iris 主题的最新功能和修复：
+要获取 maojiaoyu 主题的最新功能和修复：
 
 ```shell
 # 添加上游仓库（只需执行一次）
-git remote add upstream https://github.com/LemonAdorable/astro-theme-iris.git
+git remote add upstream https://github.com/maojiaoyu/maojiaoyu.github.io.git
 
 # 获取并合并 main 分支更新
 git fetch upstream main
 git merge upstream/main --allow-unrelated-histories
+# 合并后记得删除原来的blog文件
 ```
 
 > [!TIP]
@@ -125,6 +126,9 @@ git merge upstream/main --allow-unrelated-histories
 - [ ] 首页简历功能
 - [ ] 打包主题以及新增的各种组件
 - [ ] 更多文档和示例
+- [ ] 字体库更改为本地字体库，避免网络原因导致加载失败
+- [ ] vercel部署强制跳转https
+- [ ] 修正giscus参数传递问题
 
 ### 📚 仓库结构
 
@@ -140,6 +144,7 @@ Your Blog Repository
 
 本项目基于以下优秀的开源项目：
 
+- **[astro-theme-iris](https://github.com/LemonAdorable/astro-theme-iris)** - 基础主题框架
 - **[astro-theme-pure](https://github.com/cworld1/astro-theme-pure)** - 基础主题框架
 - **[FlexSearch](https://github.com/nextapps-de/flexsearch)** - 高性能全文搜索引擎
 - **[Tippy.js](https://atomiks.github.io/tippyjs/)** - 强大的工具提示库
@@ -201,8 +206,8 @@ Your Blog Repository
 
 ### 📄 许可证
 
-本项目基于 [Apache 2.0 许可证](https://github.com/LemonAdorable/astro-theme-iris/main/LICENSE) 开源。
+本项目基于 [Apache 2.0 许可证](https://github.com/maojiaoyu/maojiaoyu.github.io/main/LICENSE) 开源。
 
 ### ⭐ Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=LemonAdorable/astro-theme-iris&type=Date)](https://star-history.com/#LemonAdorable/astro-theme-iris&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=maojiaoyu/maojiaoyu.github.io&type=Date)](https://star-history.com/#maojiaoyu/maojiaoyu.github.io&Date)
