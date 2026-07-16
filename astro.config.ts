@@ -30,7 +30,7 @@ export default defineConfig({
   compressHTML: true,
 
   // [Basic]
-  site: 'https://maojiaoyu.github.io',
+  site: 'https://blog.maojiaoyu.com',
   // Deploy to a sub path
   // https://astro-pure.js.org/docs/setup/deployment#platform-with-base-path
   // base: '/astro-pure/',
