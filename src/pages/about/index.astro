@@ -40,6 +40,81 @@ const headings = [
     </p>
   </div>
 
+  {/* Gossips Section */}
+  <div
+    class='group flex flex-col overflow-hidden rounded-3xl border border-border/40 bg-background/40 backdrop-blur-md shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-transparent hover:shadow-[0_10px_30px_-10px_var(--primary)] mb-10'
+  >
+    <div class='p-6 sm:p-8 pt-5 sm:pt-7'>
+      <h2 id='gossips' class='mt-0 mb-6'>闲话</h2>
+      <div class='mb-2'>
+        <Collapse title='待补充'> 这里可以写一些个人的想法、感悟或者其他内容。 </Collapse>
+      </div>
+    </div>
+  </div>
+
+  {/* About Blog Section */}
+  <div
+    class='group flex flex-col overflow-hidden rounded-3xl border border-border/40 bg-background/40 backdrop-blur-md shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-transparent hover:shadow-[0_10px_30px_-10px_var(--primary)]'
+  >
+    <div class='p-6 sm:p-8 pt-5 sm:pt-7'>
+      <h2 id='about-blog' class='mt-0 mb-4'>关于博客</h2>
+      <p class='text-muted-foreground mt-0 mb-6'>网站历史：</p>
+      <Timeline
+        events={[
+          {
+            date: '2025-5-10',
+            content:
+              '使用 <a href="https://typecho.org/" target="_blank" class="text-primary hover:underline">Typecho</a> 主题建站'
+          },
+          {
+            date: '2026-6-28',
+            content:
+              '迁移至魔改的 <a href="https://github.com/LemonAdorable/astro-theme-iris" target="_blank" class="text-primary hover:underline">Astro Theme Iris</a> 主题'
+          }
+        ]}
+      />
+      <div class='mt-8 rounded-2xl border border-dashed border-primary/20 bg-primary/5 p-5'>
+        <p class='mb-3 text-sm text-foreground/80'>
+          本站的平稳运行与个性化定制，离不开以下优秀项目与开源社区提供的资源和技术支持：
+        </p>
+        <ul class='list-disc pl-5 space-y-1 text-sm text-muted-foreground'>
+          <li>
+            Site hosting: <a
+              href='https://pages.github.com/'
+              target='_blank'
+              class='text-primary hover:underline'>GitHub Pages</a
+            >
+          </li>
+          <li>
+            Framework & Theme: <a
+              href='https://astro.build/'
+              target='_blank'
+              class='text-primary hover:underline'>Astro</a
+            > + <a
+              href='https://github.com/LemonAdorable/astro-theme-iris'
+              target='_blank'
+              class='text-primary hover:underline'>Astro Theme Iris</a
+            >
+          </li>
+          <li>
+            CI/CD: <a
+              href='https://github.com/features/actions'
+              target='_blank'
+              class='text-primary hover:underline'>GitHub Actions</a
+            >
+          </li>
+          <li>
+            Comment system: <a
+              href='https://giscus.app'
+              target='_blank'
+              class='text-primary hover:underline'>Giscus</a
+            >
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>  
+
   {/* Hobbies Section */}
   <div
     class='group flex flex-col overflow-hidden rounded-3xl border border-border/40 bg-background/40 backdrop-blur-md shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-transparent hover:shadow-[0_10px_30px_-10px_var(--primary)] mb-10'
@@ -593,80 +668,7 @@ const headings = [
     </div>
   </div>
 
-  {/* Gossips Section */}
-  <div
-    class='group flex flex-col overflow-hidden rounded-3xl border border-border/40 bg-background/40 backdrop-blur-md shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-transparent hover:shadow-[0_10px_30px_-10px_var(--primary)] mb-10'
-  >
-    <div class='p-6 sm:p-8 pt-5 sm:pt-7'>
-      <h2 id='gossips' class='mt-0 mb-6'>闲话</h2>
-      <div class='mb-2'>
-        <Collapse title='待补充'> 这里可以写一些个人的想法、感悟或者其他内容。 </Collapse>
-      </div>
-    </div>
-  </div>
 
-  {/* About Blog Section */}
-  <div
-    class='group flex flex-col overflow-hidden rounded-3xl border border-border/40 bg-background/40 backdrop-blur-md shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-transparent hover:shadow-[0_10px_30px_-10px_var(--primary)]'
-  >
-    <div class='p-6 sm:p-8 pt-5 sm:pt-7'>
-      <h2 id='about-blog' class='mt-0 mb-4'>关于博客</h2>
-      <p class='text-muted-foreground mt-0 mb-6'>网站历史：</p>
-      <Timeline
-        events={[
-          {
-            date: '2025-5-10',
-            content:
-              '使用 <a href="https://typecho.org/" target="_blank" class="text-primary hover:underline">Typecho</a> 主题建站'
-          },
-          {
-            date: '2026-6-28',
-            content:
-              '迁移至魔改的 <a href="https://github.com/LemonAdorable/astro-theme-iris" target="_blank" class="text-primary hover:underline">Astro Theme Iris</a> 主题'
-          }
-        ]}
-      />
-      <div class='mt-8 rounded-2xl border border-dashed border-primary/20 bg-primary/5 p-5'>
-        <p class='mb-3 text-sm text-foreground/80'>
-          本站的平稳运行与个性化定制，离不开以下优秀项目与开源社区提供的资源和技术支持：
-        </p>
-        <ul class='list-disc pl-5 space-y-1 text-sm text-muted-foreground'>
-          <li>
-            Site hosting: <a
-              href='https://pages.github.com/'
-              target='_blank'
-              class='text-primary hover:underline'>GitHub Pages</a
-            >
-          </li>
-          <li>
-            Framework & Theme: <a
-              href='https://astro.build/'
-              target='_blank'
-              class='text-primary hover:underline'>Astro</a
-            > + <a
-              href='https://github.com/LemonAdorable/astro-theme-iris'
-              target='_blank'
-              class='text-primary hover:underline'>Astro Theme Iris</a
-            >
-          </li>
-          <li>
-            CI/CD: <a
-              href='https://github.com/features/actions'
-              target='_blank'
-              class='text-primary hover:underline'>GitHub Actions</a
-            >
-          </li>
-          <li>
-            Comment system: <a
-              href='https://giscus.app'
-              target='_blank'
-              class='text-primary hover:underline'>Giscus</a
-            >
-          </li>
-        </ul>
-      </div>
-    </div>
-  </div>
 
   <div
     style='text-align: center; margin-top: 4rem;'
