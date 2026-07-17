@@ -7,7 +7,7 @@ export const theme: ThemeUserConfig = {
   /** Will be used in index page & copyright declaration */
   author: 'maojiaoyu',
   /** Description metadata for your website. Can be used in page metadata. */
-  description: '欢迎来到猫角域，专注分享各种技术、生活，当前管理员第42只小猫，邮箱42@maojiaoyu.com',
+  description: '欢迎来到猫角域，专注分享各种技术、生活，当前管理员:第42只小猫，邮箱:42@maojiaoyu.com。看文章点击“博客”，归档点击“时光机”',
   /** The default favicon for your site which should be a path to an image in the `public/` directory. */
   favicon: '/favicon/favicon.gif',
   /** The default social card image for your site which should be a path to an image in the `public/` directory. */

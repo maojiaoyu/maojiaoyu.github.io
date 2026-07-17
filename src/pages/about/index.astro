@@ -34,9 +34,9 @@ const headings = [
     <h1 class='text-4xl font-bold tracking-tight text-foreground sm:text-6xl mb-4'>
       关于我 / About Me
     </h1>
-    <p class='text-xl text-muted-foreground font-medium'>既有缘相识，祝你心想事成</p>
+    <p class='text-xl text-muted-foreground font-medium'>小猫没有角动量，亦如宇宙不相信眼泪</p>
     <p class='text-base text-muted-foreground/80 mt-1'>
-      Now that you have met by fate, I wish you all the best of luck
+      A kitten is devoid of angular momentum, much like a universe that remains unmoved by weeping.
     </p>
   </div>
 
@@ -61,6 +61,11 @@ const headings = [
       <p class='text-muted-foreground mt-0 mb-6'>网站历史：</p>
       <Timeline
         events={[
+          {
+            date: '2021-3-14',
+            content:
+              '注册“猫角域”微信公众号，并于2022年5月2日发表第一篇文章。欢迎关注该微信公众号，获取更多内容。'
+          },
           {
             date: '2025-5-10',
             content:
@@ -115,6 +120,142 @@ const headings = [
     </div>
   </div>  
 
+
+  {/* Social Networks Section */}
+  <div
+    class='group flex flex-col overflow-hidden rounded-3xl border border-border/40 bg-background/40 backdrop-blur-md shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-transparent hover:shadow-[0_10px_30px_-10px_var(--primary)] mb-10'
+  >
+    <div class='p-6 sm:p-8 pt-5 sm:pt-7'>
+      <h2 id='social-networks' class='mt-0 mb-4'>社交网络</h2>
+      <p class='text-muted-foreground mt-0 mb-6'>优先联系邮箱：42@maojiaoyu.com，其他平台：</p>
+      <Substats
+        stats={[
+          {
+            platform: 'GitHub',
+            icon: 'github',
+            color: '#24292e',
+            link: 'https://github.com/maojiaoyu',
+            text: 'followers',
+            api: 'github/maojiaoyu'
+          },
+          {
+            platform: '知乎',
+            icon: 'zhihu',
+            color: '#0084FF',
+            link: 'https://www.zhihu.com/people/xiao-mao-mei-you-jiao-dong-liang-43',
+            text: 'followers',
+            api: ''
+          },
+          {
+            platform: '猫角域',
+            icon: 'weixin',
+            color: '#0084FF',
+            link: '',
+            text: 'followers',
+            api: ''
+          },
+          // {
+          //   platform: 'Discord',
+          //   icon: 'discord',
+          //   color: '#5865F2',
+          //   link: '',
+          //   text: 'members',
+          //   api: ''
+          // },
+          // {
+          //   platform: 'Telegram',
+          //   icon: 'telegram',
+          //   color: '#2ca5e0',
+          //   link: '',
+          //   text: 'subscribers',
+          //   api: ''
+          // },
+          // {
+          //   platform: 'Bilibili',
+          //   icon: 'bilibili',
+          //   color: '#FB7299',
+          //   link: '',
+          //   text: 'followers',
+          //   api: ''
+          // },
+          // {
+          //   platform: '酷安',
+          //   icon: 'coolapk',
+          //   color: '#11A984',
+          //   link: '',
+          //   text: 'followers',
+          //   api: ''
+          // },
+          // {
+          //   platform: 'Steam',
+          //   icon: 'steam',
+          //   color: '#171a21',
+          //   link: '',
+          //   text: 'friends',
+          //   api: ''
+          // },
+
+          // {
+          //   platform: 'X',
+          //   icon: 'x',
+          //   color: '#000000',
+          //   link: '',
+          //   text: 'followers',
+          //   api: ''
+          // },
+          // {
+          //   platform: 'Firefly',
+          //   iconUrl: fireflyIcon.src,
+          //   color: '#FF6B6B',
+          //   link: '',
+          //   text: 'followers',
+          //   api: ''
+          // },
+          // {
+          //   platform: 'Farcaster',
+          //   iconUrl: farcasterIcon.src,
+          //   color: '#8B5CF6',
+          //   link: '',
+          //   text: 'followers',
+          //   api: ''
+          // },
+          // {
+          //   platform: 'Paragraph',
+          //   iconUrl: paragraphIcon.src,
+          //   color: '#6366F1',
+          //   link: '',
+          //   text: 'followers',
+          //   api: ''
+          // },
+          // {
+          //   platform: 'Lens',
+          //   iconUrl: lensIcon.src,
+          //   color: '#ABFE2C',
+          //   link: '',
+          //   text: 'followers',
+          //   api: ''
+          // },
+          // {
+          //   platform: 'Bluesky',
+          //   iconUrl: blueskyIcon.src,
+          //   color: '#00A8FF',
+          //   link: '',
+          //   text: 'followers',
+          //   api: ''
+          // },
+          // {
+          //   platform: 'Facebook',
+          //   iconUrl: facebookIcon.src,
+          //   color: '#1877F2',
+          //   link: '',
+          //   text: 'followers',
+          //   api: ''
+          // }
+        ]}
+      />
+    </div>
+  </div>
+
   {/* Hobbies Section */}
   <div
     class='group flex flex-col overflow-hidden rounded-3xl border border-border/40 bg-background/40 backdrop-blur-md shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-transparent hover:shadow-[0_10px_30px_-10px_var(--primary)] mb-10'
@@ -137,14 +278,14 @@ const headings = [
               竞技
             </h4>
             <div class='flex flex-wrap gap-2'>
-              <span
+              <!-- <span
                 class='rounded-lg border bg-background/50 px-3 py-1.5 text-sm backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-muted shadow-sm'
-                >League of Legends (LOL)</span
+                >Dyson Sphere Program (戴森球计划)</span
               >
               <span
                 class='rounded-lg border bg-background/50 px-3 py-1.5 text-sm backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-muted shadow-sm'
                 >Overwatch (OW)</span
-              >
+              > -->
               <span
                 class='rounded-lg border bg-background/50 px-3 py-1.5 text-sm backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-muted shadow-sm'
                 >王者荣耀</span
@@ -152,7 +293,7 @@ const headings = [
             </div>
           </div>
 
-          <div>
+          <!-- <div>
             <h4 class='mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground'>
               剧情
             </h4>
@@ -174,7 +315,7 @@ const headings = [
                 >黑神话：悟空</span
               >
             </div>
-          </div>
+          </div> -->
 
           <div>
             <h4 class='mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground'>
@@ -183,9 +324,9 @@ const headings = [
             <div class='flex flex-wrap gap-2'>
               <span
                 class='rounded-lg border bg-background/50 px-3 py-1.5 text-sm backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-muted shadow-sm'
-                >Ghostrunner</span
+                >Dyson Sphere Program (戴森球计划)</span
               >
-              <span
+              <!-- <span
                 class='rounded-lg border bg-background/50 px-3 py-1.5 text-sm backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-muted shadow-sm'
                 >GTA</span
               >
@@ -196,11 +337,11 @@ const headings = [
               <span
                 class='rounded-lg border bg-background/50 px-3 py-1.5 text-sm backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-muted shadow-sm'
                 >泰坦陨落2</span
-              >
+              > -->
             </div>
           </div>
 
-          <div>
+          <!-- <div>
             <h4 class='mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground'>
               音游
             </h4>
@@ -234,9 +375,9 @@ const headings = [
                 >Bits & Bops</span
               >
             </div>
-          </div>
+          </div> -->
 
-          <div>
+          <!-- <div>
             <h4 class='mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground'>
               休闲
             </h4>
@@ -254,7 +395,7 @@ const headings = [
                 >文明</span
               >
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
@@ -327,12 +468,12 @@ const headings = [
             href: 'https://www.microsoft.com/edge',
             icon: import('@/assets/tools/edge.svg?raw')
           },
-          {
-            name: 'Zen',
-            description: '浏览器',
-            href: 'https://zen-browser.app/',
-            icon: import('@/assets/tools/zen.svg?raw')
-          },
+          // {
+          //   name: 'Zen',
+          //   description: '浏览器',
+          //   href: 'https://zen-browser.app/',
+          //   icon: import('@/assets/tools/zen.svg?raw')
+          // },
           {
             name: 'Obsidian',
             description: '笔记软件',
@@ -405,48 +546,48 @@ const headings = [
             href: 'https://developer.mozilla.org/en-US/docs/Web/CSS',
             icon: import('@/assets/tools/css3.svg?raw')
           },
-          {
-            name: 'C++',
-            description: '编程语言',
-            href: 'https://isocpp.org/',
-            icon: import('@/assets/tools/cpp.svg?raw')
-          },
-          {
-            name: 'C',
-            description: '编程语言',
-            href: 'https://www.iso.org/standard/74528.html',
-            icon: import('@/assets/tools/c.svg?raw')
-          },
-          {
-            name: 'C#',
-            description: '编程语言',
-            href: 'https://dotnet.microsoft.com/languages/csharp',
-            icon: import('@/assets/tools/csharp.svg?raw')
-          },
-          {
-            name: 'Rust',
-            description: '编程语言',
-            href: 'https://www.rust-lang.org/',
-            icon: import('@/assets/tools/rust.svg?raw')
-          },
-          {
-            name: 'Lua',
-            description: '编程语言',
-            href: 'https://www.lua.org/',
-            icon: luaIcon
-          },
-          {
-            name: 'Solidity',
-            description: '编程语言',
-            href: 'https://soliditylang.org/',
-            icon: import('@/assets/tools/solidity.svg?raw')
-          },
-          {
-            name: 'MATLAB',
-            description: '编程语言',
-            href: 'https://www.mathworks.com/products/matlab.html',
-            icon: import('@/assets/tools/matlab.svg?raw')
-          }
+          // {
+          //   name: 'C++',
+          //   description: '编程语言',
+          //   href: 'https://isocpp.org/',
+          //   icon: import('@/assets/tools/cpp.svg?raw')
+          // },
+          // {
+          //   name: 'C',
+          //   description: '编程语言',
+          //   href: 'https://www.iso.org/standard/74528.html',
+          //   icon: import('@/assets/tools/c.svg?raw')
+          // },
+          // {
+          //   name: 'C#',
+          //   description: '编程语言',
+          //   href: 'https://dotnet.microsoft.com/languages/csharp',
+          //   icon: import('@/assets/tools/csharp.svg?raw')
+          // },
+          // {
+          //   name: 'Rust',
+          //   description: '编程语言',
+          //   href: 'https://www.rust-lang.org/',
+          //   icon: import('@/assets/tools/rust.svg?raw')
+          // },
+          // {
+          //   name: 'Lua',
+          //   description: '编程语言',
+          //   href: 'https://www.lua.org/',
+          //   icon: luaIcon
+          // },
+          // {
+          //   name: 'Solidity',
+          //   description: '编程语言',
+          //   href: 'https://soliditylang.org/',
+          //   icon: import('@/assets/tools/solidity.svg?raw')
+          // },
+          // {
+          //   name: 'MATLAB',
+          //   description: '编程语言',
+          //   href: 'https://www.mathworks.com/products/matlab.html',
+          //   icon: import('@/assets/tools/matlab.svg?raw')
+          // }
         ]}
       />
       <ToolSection
@@ -495,24 +636,24 @@ const headings = [
             href: 'https://www.debian.org/',
             icon: import('@/assets/tools/debian.svg?raw')
           },
-          {
-            name: 'iPadOS',
-            description: 'iPad操作系统',
-            href: 'https://www.apple.com/ipados/',
-            icon: import('@/assets/tools/apple.svg?raw')
-          },
+          // {
+          //   name: 'iPadOS',
+          //   description: 'iPad操作系统',
+          //   href: 'https://www.apple.com/ipados/',
+          //   icon: import('@/assets/tools/apple.svg?raw')
+          // },
           {
             name: 'Windows 11',
             description: '操作系统',
             href: 'https://news.microsoft.com/windows11-general-availability/',
             icon: import('@/assets/tools/windows11.svg?raw')
           },
-          {
-            name: 'Kali Linux',
-            description: 'Linux发行版',
-            href: 'https://www.kali.org/',
-            icon: import('@/assets/tools/kali.svg?raw')
-          },
+          // {
+          //   name: 'Kali Linux',
+          //   description: 'Linux发行版',
+          //   href: 'https://www.kali.org/',
+          //   icon: import('@/assets/tools/kali.svg?raw')
+          // },
           {
             name: 'OpenWrt',
             description: '路由器系统',
@@ -542,131 +683,6 @@ const headings = [
     </div>
   </div>
 
-  {/* Social Networks Section */}
-  <div
-    class='group flex flex-col overflow-hidden rounded-3xl border border-border/40 bg-background/40 backdrop-blur-md shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-transparent hover:shadow-[0_10px_30px_-10px_var(--primary)] mb-10'
-  >
-    <div class='p-6 sm:p-8 pt-5 sm:pt-7'>
-      <h2 id='social-networks' class='mt-0 mb-4'>社交网络</h2>
-      <p class='text-muted-foreground mt-0 mb-6'>欢迎通过以下平台联系我：</p>
-      <Substats
-        stats={[
-          {
-            platform: 'GitHub',
-            icon: 'github',
-            color: '#24292e',
-            link: 'https://github.com/maojiaoyu',
-            text: 'followers',
-            api: 'github/maojiaoyu'
-          },
-          {
-            platform: 'Discord',
-            icon: 'discord',
-            color: '#5865F2',
-            link: '',
-            text: 'members',
-            api: ''
-          },
-          {
-            platform: 'Telegram',
-            icon: 'telegram',
-            color: '#2ca5e0',
-            link: '',
-            text: 'subscribers',
-            api: ''
-          },
-          {
-            platform: 'Bilibili',
-            icon: 'bilibili',
-            color: '#FB7299',
-            link: '',
-            text: 'followers',
-            api: ''
-          },
-          {
-            platform: '酷安',
-            icon: 'coolapk',
-            color: '#11A984',
-            link: '',
-            text: 'followers',
-            api: ''
-          },
-          {
-            platform: 'Steam',
-            icon: 'steam',
-            color: '#171a21',
-            link: '',
-            text: 'friends',
-            api: ''
-          },
-          {
-            platform: '知乎',
-            icon: 'zhihu',
-            color: '#0084FF',
-            link: '',
-            text: 'followers',
-            api: ''
-          },
-          // {
-          //   platform: 'X',
-          //   icon: 'x',
-          //   color: '#000000',
-          //   link: '',
-          //   text: 'followers',
-          //   api: ''
-          // },
-          // {
-          //   platform: 'Firefly',
-          //   iconUrl: fireflyIcon.src,
-          //   color: '#FF6B6B',
-          //   link: '',
-          //   text: 'followers',
-          //   api: ''
-          // },
-          // {
-          //   platform: 'Farcaster',
-          //   iconUrl: farcasterIcon.src,
-          //   color: '#8B5CF6',
-          //   link: '',
-          //   text: 'followers',
-          //   api: ''
-          // },
-          // {
-          //   platform: 'Paragraph',
-          //   iconUrl: paragraphIcon.src,
-          //   color: '#6366F1',
-          //   link: '',
-          //   text: 'followers',
-          //   api: ''
-          // },
-          // {
-          //   platform: 'Lens',
-          //   iconUrl: lensIcon.src,
-          //   color: '#ABFE2C',
-          //   link: '',
-          //   text: 'followers',
-          //   api: ''
-          // },
-          // {
-          //   platform: 'Bluesky',
-          //   iconUrl: blueskyIcon.src,
-          //   color: '#00A8FF',
-          //   link: '',
-          //   text: 'followers',
-          //   api: ''
-          // },
-          // {
-          //   platform: 'Facebook',
-          //   iconUrl: facebookIcon.src,
-          //   color: '#1877F2',
-          //   link: '',
-          //   text: 'followers',
-          //   api: ''
-          // }
-        ]}
-      />
-    </div>
-  </div>
 
 
 
