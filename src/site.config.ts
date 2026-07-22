@@ -66,11 +66,11 @@ export const theme: ThemeUserConfig = {
     // year: `© 2019 - ${new Date().getFullYear()}`,
     links: [
       // Registration link
-      {
-        title: '黔ICP备2025055075号 贵公网安备52062402000235号',
-        link: 'https://icp.gov.moe/?keyword=2025055075',
-        style: 'text-sm' // Uno/TW CSS class
-      },
+      // {
+      //   title: 'XXX备案号',
+      //   link: 'https://icp.gov.moe/?keyword=2025055075',
+      //   style: 'text-sm' // Uno/TW CSS class
+      // },
       // Privacy Policy link
       {
         title: 'Site Policy',
