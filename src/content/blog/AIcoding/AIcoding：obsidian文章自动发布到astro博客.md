@@ -14,8 +14,8 @@ description: obsidian文章自动发布到astro博客
 publishDate: '2026-07-22T00:00:00'
 updatedDate: '2026-07-22T00:00:00'
 heroImage:
-  src: "./default.jpg"
-  alt: "猫角域blog"
+  src: /src/content/blog/default.jpg
+  alt: 猫角域blog
 language: zh
 slug: aicoding-obsidian-auto-published-to-astro
 draft: false
