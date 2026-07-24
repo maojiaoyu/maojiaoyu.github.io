@@ -14,7 +14,7 @@ description: 自动把 Obsidian 笔记校验、转换并同步到 Astro 博客 G
 publishDate: '2026-07-22T00:00:00'
 updatedDate: '2026-07-22T00:00:00'
 heroImage:
-  src: /src/content/blog/default.jpg
+  src: ./default.jpg
   alt: 猫角域blog
 language: zh
 slug: aicoding-obsidian-auto-published-to-astro
